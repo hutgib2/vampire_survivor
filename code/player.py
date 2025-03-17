@@ -7,7 +7,7 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load(join('..', 'images', 'player', 'down', '0.png')).convert_alpha()
         self.rect = self.image.get_frect(center = pos)
         self.direction = pygame.math.Vector2()
-        self.speed = 500
+        self.speed = 450
         self.collision_sprites = collision_sprites
         self.hitbox_rect = self.rect.inflate(-60, -90)
         self.state, self.frame_index = 'right', 0
@@ -45,8 +45,8 @@ class Player(pygame.sprite.Sprite):
 
     def input(self):
         keys = pygame.key.get_pressed()
-        self.direction.x = int(keys[pygame.K_RIGHT]) - int(keys[pygame.K_LEFT])
-        self.direction.y = int(keys[pygame.K_DOWN]) - int(keys[pygame.K_UP])
+        self.direction.x = int(keys[pygame.K_RIGHT] or keys[pygame.K_d]) - int(keys[pygame.K_LEFT] or keys[pygame.K_a])
+        self.direction.y = int(keys[pygame.K_DOWN] or keys[pygame.K_s]) - int(keys[pygame.K_UP] or keys[pygame.K_w])
         if self.direction:
             self.direction = self.direction.normalize()
     
