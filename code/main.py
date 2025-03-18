@@ -6,12 +6,9 @@ from pytmx.util_pygame import load_pygame
 from groups import AllSprites
 
 class Game:
-    def __init__(self): # Constructor 
-        pygame.init()
-        self.display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-        pygame.display.set_caption("Vampire Survivor")
+    def __init__(self, display_surface): # Constructor 
+        self.display_surface = display_surface
         self.running = True
-        self.home_screen = True
         self.clock = pygame.time.Clock()
         # groups
         self.all_sprites = AllSprites()
@@ -96,8 +93,8 @@ class Game:
         collision_sprites = pygame.sprite.spritecollide(self.player, self.enemy_sprites, False, pygame.sprite.collide_mask)
         for enemy in collision_sprites:
             if enemy.death_time == 0:
-                self.running = False
-                self.home_screen = True
+                return True
+        return False
     
     def get_spawn_position(self):
         distance_from_player = 0
@@ -113,35 +110,49 @@ class Game:
         pygame.draw.rect(self.display_surface, 'gray25', self.text_rect.inflate(20, 10).move(0, -6), 5, 10)
 
     def run(self):
-        while self.home_screen:
-            while self.home_screen:
-                for event in pygame.event.get():
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_RETURN:
-                            self.home_screen = False
-                            self.running = True
-                    if event.type == pygame.QUIT:
-                        self.home_screen = False
-                        self.running = False
-            while self.running:
-                dt = self.clock.tick() / 1000
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        self.running = False
-                        self.home_screen = False
-                    if event.type == self.enemy_event:
-                        Enemy(self.get_spawn_position(), choice(list(self.enemy_frames.items())), (self.all_sprites, self.enemy_sprites), self.player, self.collision_sprites)
-                self.gun_timer()
-                self.input()
-                self.all_sprites.update(dt)
-                self.bullet_collision()
-                self.player_collision()
-                self.all_sprites.draw(self.player.rect.center)
-                self.display_score()
-                pygame.display.update()
-          
-        pygame.quit()
+        while self.running:
+            dt = self.clock.tick() / 1000
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return False
+                if event.type == self.enemy_event:
+                    Enemy(self.get_spawn_position(), choice(list(self.enemy_frames.items())), (self.all_sprites, self.enemy_sprites), self.player, self.collision_sprites)
+            self.gun_timer()
+            self.input()
+            self.all_sprites.update(dt)
+            self.bullet_collision()
+            if self.player_collision():
+                self.music.stop()
+                return True
+            self.all_sprites.draw(self.player.rect.center)
+            self.display_score()
+            pygame.display.update()
+
+class HomeScreen:
+    def __init__(self, display_surface):
+        self.waiting = True
+        self.display_surface = display_surface
+
+    def wait(self):
+        while self.waiting:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        return True
+                if event.type == pygame.QUIT:
+                    return False
 
 if __name__ == '__main__':
-    game = Game()
-    game.run()
+    # loop between creating homescreen and game objects
+    # this will reset the games memory each time so we can start clean
+    pygame.init()
+    display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    pygame.display.set_caption("Vampire Survivor")
+    is_running = True
+    while is_running:
+        homescreen = HomeScreen(display_surface)
+        is_running = homescreen.wait()
+        if is_running:
+            game = Game(display_surface)
+            is_running = game.run()
+    pygame.quit()
