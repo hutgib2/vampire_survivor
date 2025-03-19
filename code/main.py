@@ -20,7 +20,7 @@ class Game:
         self.shoot_time = 0
         self.gun_cooldown = 250
         self.kill_count = 0
-        
+        self.high_score = load_high_score()
         self.enemy_event = pygame.event.custom_type()
         pygame.time.set_timer(self.enemy_event, 300)
         self.spawn_positions = []
@@ -93,6 +93,8 @@ class Game:
         collision_sprites = pygame.sprite.spritecollide(self.player, self.enemy_sprites, False, pygame.sprite.collide_mask)
         for enemy in collision_sprites:
             if enemy.death_time == 0:
+                if self.kill_count > self.high_score:
+                    save_high_score(self.kill_count)
                 return True
         return False
     
@@ -128,8 +130,19 @@ class Game:
             self.display_score()
             pygame.display.update()
 
+def load_high_score():
+    with open(join('..', 'data', 'high_score.txt'), 'r') as file:
+        content = file.read()
+        highscore = int(content.split("=")[1])
+        return highscore
+
+def save_high_score(current_score):
+    with open(join('..', 'data', 'high_score.txt'), 'w') as file:
+        file.write('highscore=' + str(current_score))
+
 class HomeScreen:
     def __init__(self, display_surface, background):
+        self.high_score = load_high_score()
         self.waiting = True
         self.display_surface = display_surface
         self.background = background
@@ -142,7 +155,7 @@ class HomeScreen:
 
 
     def display_high_score(self):
-        self.text_surf = self.font.render('high score = 100', True, 'gray25')
+        self.text_surf = self.font.render('high score = ' +str(self.high_score), True, 'gray25')
         self.text_rect = self.text_surf.get_frect(midbottom = (WINDOW_WIDTH / 2 - 180 ,WINDOW_HEIGHT - 180))
         self.display_surface.blit(self.text_surf, self.text_rect)
 
