@@ -129,9 +129,22 @@ class Game:
             pygame.display.update()
 
 class HomeScreen:
-    def __init__(self, display_surface):
+    def __init__(self, display_surface, background):
         self.waiting = True
         self.display_surface = display_surface
+        self.background = background
+        self.font = pygame.font.Font(join('..', 'images', 'Oxanium-Bold.ttf'), 40)
+
+        # Draw homescreen
+        self.display_surface.blit(background, (0, 0))
+        self.display_high_score()
+        pygame.display.update()
+
+
+    def display_high_score(self):
+        self.text_surf = self.font.render('high score = 100', True, 'gray25')
+        self.text_rect = self.text_surf.get_frect(midbottom = (WINDOW_WIDTH / 2 - 180 ,WINDOW_HEIGHT - 180))
+        self.display_surface.blit(self.text_surf, self.text_rect)
 
     def wait(self):
         while self.waiting:
@@ -148,9 +161,10 @@ if __name__ == '__main__':
     pygame.init()
     display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Vampire Survivor")
+    home_screen_image = pygame.image.load(join('..', 'images', 'home_screen.png'))
     is_running = True
     while is_running:
-        homescreen = HomeScreen(display_surface)
+        homescreen = HomeScreen(display_surface, home_screen_image)
         is_running = homescreen.wait()
         if is_running:
             game = Game(display_surface)
