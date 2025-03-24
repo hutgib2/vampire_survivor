@@ -53,6 +53,7 @@ class Game:
                 self.spawn_positions.append((marker.x, marker.y))
     
     def load_images(self):
+        self.life_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'life.png')), (75, 75)).convert_alpha()
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
         folders = list(walk(join('..', 'images', 'enemies')))[0][1]
         self.enemy_frames = {}
@@ -93,23 +94,33 @@ class Game:
         collision_sprites = pygame.sprite.spritecollide(self.player, self.enemy_sprites, False, pygame.sprite.collide_mask)
         for enemy in collision_sprites:
             if enemy.death_time == 0:
-                if self.kill_count > self.high_score:
-                    save_high_score(self.kill_count)
-                return True
+                enemy.destroy()
+                self.impact_sound.play()
+                self.player.lives -= 1
+                if self.player.lives < 1:
+                    if self.kill_count > self.high_score:
+                        save_high_score(self.kill_count)
+                    return True
         return False
     
     def get_spawn_position(self):
         distance_from_player = 0
-        while distance_from_player < 400:
+        while distance_from_player < 700:
             pos = choice(self.spawn_positions)
             distance_from_player = pygame.math.Vector2.magnitude(pygame.math.Vector2(pos) - pygame.math.Vector2(self.player.rect.center))
         return pos
     
     def display_score(self):
         self.text_surf = self.font.render(str(self.kill_count), True, 'gray25')
-        self.text_rect = self.text_surf.get_frect(midbottom = (WINDOW_WIDTH / 2,WINDOW_HEIGHT - 50))
+        self.text_rect = self.text_surf.get_frect(topleft = (300, 25))
         self.display_surface.blit(self.text_surf, self.text_rect)
         pygame.draw.rect(self.display_surface, 'gray25', self.text_rect.inflate(20, 10).move(0, -6), 5, 10)
+
+    def display_lives(self):
+        for i in range(self.player.lives):
+            self.life_rect = self.life_surf.get_frect(topleft = (10 + (i*85), 10))
+            self.display_surface.blit(self.life_surf, self.life_rect)
+        
 
     def run(self):
         while self.running:
@@ -128,12 +139,14 @@ class Game:
                 return True
             self.all_sprites.draw(self.player.rect.center)
             self.display_score()
+            self.display_lives()
             pygame.display.update()
 
 def load_high_score():
     with open(join('..', 'data', 'high_score.txt'), 'r') as file:
         content = file.read()
         highscore = int(content.split("=")[1])
+        
         return highscore
 
 def save_high_score(current_score):
@@ -174,7 +187,7 @@ if __name__ == '__main__':
     pygame.init()
     display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Vampire Survivor")
-    home_screen_image = pygame.image.load(join('..', 'images', 'home_screen.png'))
+    home_screen_image = pygame.transform.scale(pygame.image.load(join('..', 'images', 'home_screen.png')), (WINDOW_WIDTH, WINDOW_HEIGHT))
     is_running = True
     while is_running:
         homescreen = HomeScreen(display_surface, home_screen_image)

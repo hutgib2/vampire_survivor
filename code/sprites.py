@@ -75,7 +75,7 @@ class Enemy(pygame.sprite.Sprite):
         self.hitbox_rect = self.rect.inflate(-20, -40)
         self.collision_sprites = collision_sprites
         self.direction = pygame.Vector2()
-        self.speed = 200
+        self.speed = 225
         self.death_time = 0
         self.death_duration = 400
     def animate(self, dt):
