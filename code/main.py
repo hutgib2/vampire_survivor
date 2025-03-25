@@ -86,7 +86,7 @@ class Game:
                 for enemy in collision_sprites:
                     if enemy.death_time == 0:
                         self.impact_sound.play()
-                        enemy.destroy()
+                        enemy.destroy(False)
                         bullet.kill()
                         self.kill_count += 1
 
@@ -94,7 +94,7 @@ class Game:
         collision_sprites = pygame.sprite.spritecollide(self.player, self.enemy_sprites, False, pygame.sprite.collide_mask)
         for enemy in collision_sprites:
             if enemy.death_time == 0:
-                enemy.destroy()
+                enemy.destroy(True)
                 self.impact_sound.play()
                 self.player.lives -= 1
                 if self.player.lives < 1:

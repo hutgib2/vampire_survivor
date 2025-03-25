@@ -7,7 +7,7 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load(join('..', 'images', 'player', 'down', '0.png')).convert_alpha()
         self.rect = self.image.get_frect(center = pos)
         self.direction = pygame.math.Vector2()
-        self.speed = 300
+        self.speed = 325
         self.collision_sprites = collision_sprites
         self.hitbox_rect = self.rect.inflate(-60, -90)
         self.state, self.frame_index = 'right', 0
