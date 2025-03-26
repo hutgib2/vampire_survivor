@@ -10,20 +10,29 @@ class Game:
         self.display_surface = display_surface
         self.running = True
         self.clock = pygame.time.Clock()
-        # groups
-        self.all_sprites = AllSprites()
-        self.collision_sprites = pygame.sprite.Group()
-        self.bullet_sprites = pygame.sprite.Group()
-        self.enemy_sprites = pygame.sprite.Group()
         self.font = pygame.font.Font(join('..', 'images', 'Oxanium-Bold.ttf'), 40)
         self.can_shoot = True
         self.shoot_time = 0
         self.gun_cooldown = 250
         self.kill_count = 0
         self.high_score = load_high_score()
+
+        # groups
+        self.all_sprites = AllSprites()
+        self.collision_sprites = pygame.sprite.Group()
+        self.bullet_sprites = pygame.sprite.Group()
+        self.enemy_sprites = pygame.sprite.Group()
+        self.powerup_sprites = pygame.sprite.Group()
+
+        #events
         self.enemy_event = pygame.event.custom_type()
         pygame.time.set_timer(self.enemy_event, 300)
-        self.spawn_positions = []
+        self.powerup_event = pygame.event.custom_type()
+        pygame.time.set_timer(self.powerup_event, 10000)
+        self.enemy_spawn_positions = []
+        self.powerup_spawn_positions = []
+
+        #audio
         self.shoot_sound = pygame.mixer.Sound(join('..', 'audio', 'shoot.wav'))
         self.shoot_sound.set_volume(0.2)
         self.impact_sound = pygame.mixer.Sound(join('..', 'audio', 'new_impact.ogg'))
@@ -31,6 +40,7 @@ class Game:
         self.music = pygame.mixer.Sound(join('..', 'audio', 'my_first_mashup.wav'))
         self.music.set_volume(0.55)
         self.music.play(loops = 1)
+        
         self.load_images()
         self.setup()
 
@@ -49,8 +59,10 @@ class Game:
             if marker.name == 'Player':
                 self.player = Player((marker.x, marker.y), self.all_sprites, self.collision_sprites)
                 self.gun = Gun(self.player, self.all_sprites)
+            elif marker.name == 'Power up':
+                self.powerup_spawn_positions.append((marker.x, marker.y))
             else:
-                self.spawn_positions.append((marker.x, marker.y))
+                self.enemy_spawn_positions.append((marker.x, marker.y))
     
     def load_images(self):
         self.life_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'life.png')), (75, 75)).convert_alpha()
@@ -103,10 +115,15 @@ class Game:
                     return True
         return False
     
-    def get_spawn_position(self):
+    def powerup_collision(self):
+        collision_sprites = pygame.sprite.spritecollide(self.player, self.powerup_sprites, True, pygame.sprite.collide_mask)
+        for powerup in collision_sprites:
+            if self.player.lives < 3:
+                self.player.lives += 1
+    def get_spawn_position(self, spawn_positions):
         distance_from_player = 0
         while distance_from_player < 700:
-            pos = choice(self.spawn_positions)
+            pos = choice(spawn_positions)
             distance_from_player = pygame.math.Vector2.magnitude(pygame.math.Vector2(pos) - pygame.math.Vector2(self.player.rect.center))
         return pos
     
@@ -129,11 +146,14 @@ class Game:
                 if event.type == pygame.QUIT:
                     return False
                 if event.type == self.enemy_event:
-                    Enemy(self.get_spawn_position(), choice(list(self.enemy_frames.items())), (self.all_sprites, self.enemy_sprites), self.player, self.collision_sprites)
+                    Enemy(self.get_spawn_position(self.enemy_spawn_positions), choice(list(self.enemy_frames.items())), (self.all_sprites, self.enemy_sprites), self.player, self.collision_sprites)
+                if event.type == self.powerup_event:
+                    Powerup(self.get_spawn_position(self.powerup_spawn_positions), self.life_surf, (self.all_sprites, self.powerup_sprites), self.player)
             self.gun_timer()
             self.input()
             self.all_sprites.update(dt)
             self.bullet_collision()
+            self.powerup_collision()
             if self.player_collision():
                 self.music.stop()
                 return True

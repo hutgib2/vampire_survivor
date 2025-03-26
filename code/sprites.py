@@ -62,12 +62,21 @@ class Gun(pygame.sprite.Sprite):
         self.rotate_gun()
         self.rect.center = self.player.rect.center + (self.player_direction + pygame.Vector2(0, -0.2)) * self.distance
 
+class Powerup(pygame.sprite.Sprite):
+    def __init__(self, pos, surf, groups, player):
+        super().__init__(groups)
+        self.player = player
+        self.image = surf
+        self.rect = self.image.get_frect(center = pos)
+
+
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, pos, framedata, groups, player, collision_sprites):
         super().__init__(groups)
         self.player = player
         self.enemy_type = framedata[0]
-        self.frames, self.frame_index = framedata[1], 0
+        self.frames = framedata[1]
+        self.frame_index = 0
         self.image = self.frames[self.frame_index]
         self.animation_speed = 6
 
@@ -78,6 +87,7 @@ class Enemy(pygame.sprite.Sprite):
         self.speed = 250
         self.death_time = 0
         self.death_duration = 400
+
     def animate(self, dt):
         self.frame_index += self.animation_speed * dt
         self.image = self.frames[int(self.frame_index) % len(self.frames)]
