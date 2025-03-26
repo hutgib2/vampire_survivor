@@ -120,6 +120,8 @@ class Game:
         for powerup in collision_sprites:
             if self.player.lives < 3:
                 self.player.lives += 1
+
+
     def get_spawn_position(self, spawn_positions):
         distance_from_player = 0
         while distance_from_player < 700:
@@ -208,11 +210,13 @@ if __name__ == '__main__':
     display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Vampire Survivor")
     home_screen_image = pygame.transform.scale(pygame.image.load(join('..', 'images', 'home_screen.png')), (WINDOW_WIDTH, WINDOW_HEIGHT))
-    is_running = True
+    game_over_screen = pygame.transform.scale(pygame.image.load(join('..', 'images', 'game_over.png')), (WINDOW_WIDTH, WINDOW_HEIGHT))
+    homescreen = HomeScreen(display_surface, home_screen_image)
+    is_running = homescreen.wait()
     while is_running:
-        homescreen = HomeScreen(display_surface, home_screen_image)
-        is_running = homescreen.wait()
+        game = Game(display_surface)
+        is_running = game.run()
         if is_running:
-            game = Game(display_surface)
-            is_running = game.run()
+            homescreen = HomeScreen(display_surface, game_over_screen)
+            is_running = homescreen.wait()
     pygame.quit()
