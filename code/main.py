@@ -4,6 +4,7 @@ from sprites import *
 from random import randint, choice
 from pytmx.util_pygame import load_pygame
 from groups import AllSprites
+from homescreen import *
 
 class Game:
     def __init__(self, display_surface): # Constructor 
@@ -17,13 +18,21 @@ class Game:
         self.kill_count = 0
         self.high_score = load_high_score()
 
+        #powerups
+        self.powerup_count = 0
+        self.is_piercing = False
+        self.pierce_cooldown = 3000
+        self.pierce_time = 0
+        self.machinegun_is_active = False
+        self.machinegun_cooldown = 3000
+        self.machinegun_time = 0
+
         # groups
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
         self.bullet_sprites = pygame.sprite.Group()
         self.enemy_sprites = pygame.sprite.Group()
         self.powerup_sprites = pygame.sprite.Group()
-
         #events
         self.enemy_event = pygame.event.custom_type()
         pygame.time.set_timer(self.enemy_event, 300)
@@ -65,7 +74,11 @@ class Game:
                 self.enemy_spawn_positions.append((marker.x, marker.y))
     
     def load_images(self):
-        self.life_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'life.png')), (75, 75)).convert_alpha()
+        self.life_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'life.png')), (75, 75)).convert_alpha()
+        self.pierce_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'pierce.png')), (75, 75)).convert_alpha()
+        self.machinegun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'machinegun.png')), (90, 90)).convert_alpha()
+        self.powerup_surfaces = {'life':self.life_surf, 'pierce':self.pierce_surf, 'machinegun':self.machinegun_surf}
+
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
         folders = list(walk(join('..', 'images', 'enemies')))[0][1]
         self.enemy_frames = {}
@@ -99,8 +112,10 @@ class Game:
                     if enemy.death_time == 0:
                         self.impact_sound.play()
                         enemy.destroy(False)
-                        bullet.kill()
+                        if self.is_piercing == False:
+                            bullet.kill()
                         self.kill_count += 1
+                        break
 
     def player_collision(self):
         collision_sprites = pygame.sprite.spritecollide(self.player, self.enemy_sprites, False, pygame.sprite.collide_mask)
@@ -115,18 +130,52 @@ class Game:
                     return True
         return False
     
+    def powerup_timer(self):
+        if self.is_piercing:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.pierce_time >= self.pierce_cooldown:
+                self.is_piercing = False
+        if self.machinegun_is_active:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.machinegun_time >= self.machinegun_cooldown:
+                self.machinegun_is_active = False
+                self.gun_cooldown *= 2
+            
+
     def powerup_collision(self):
         collision_sprites = pygame.sprite.spritecollide(self.player, self.powerup_sprites, True, pygame.sprite.collide_mask)
         for powerup in collision_sprites:
-            if self.player.lives < 3:
-                self.player.lives += 1
-
+            self.powerup_count -= 1
+            if powerup.type == 'life':
+                if self.player.lives < 3:
+                    self.player.lives += 1
+            if powerup.type == 'pierce':
+                self.pierce_time = pygame.time.get_ticks()
+                self.is_piercing = True
+            if powerup.type == 'machinegun':
+                self.gun_cooldown /= 2
+                self.machinegun_time = pygame.time.get_ticks()
+                self.machinegun_is_active = True
 
     def get_spawn_position(self, spawn_positions):
         distance_from_player = 0
         while distance_from_player < 700:
             pos = choice(spawn_positions)
             distance_from_player = pygame.math.Vector2.magnitude(pygame.math.Vector2(pos) - pygame.math.Vector2(self.player.rect.center))
+        return pos
+    
+    def get_powerup_spawn_position(self, spawn_positions):
+        distance_from_powerup = 0
+        valid_pos = False
+        while not valid_pos:
+            pos = choice(spawn_positions)
+            valid_pos = True
+            if not self.powerup_sprites:
+                break
+            for powerup in self.powerup_sprites:
+                distance_from_powerup = pygame.math.Vector2.magnitude(pygame.math.Vector2(pos) - pygame.math.Vector2(powerup.rect.center))
+                if distance_from_powerup < 100:
+                    valid_pos = False
         return pos
     
     def display_score(self):
@@ -149,9 +198,11 @@ class Game:
                     return False
                 if event.type == self.enemy_event:
                     Enemy(self.get_spawn_position(self.enemy_spawn_positions), choice(list(self.enemy_frames.items())), (self.all_sprites, self.enemy_sprites), self.player, self.collision_sprites)
-                if event.type == self.powerup_event:
-                    Powerup(self.get_spawn_position(self.powerup_spawn_positions), self.life_surf, (self.all_sprites, self.powerup_sprites), self.player)
+                if event.type == self.powerup_event and self.powerup_count < 5:
+                    Powerup(self.get_powerup_spawn_position(self.powerup_spawn_positions), choice(list(self.powerup_surfaces.items())), (self.all_sprites, self.powerup_sprites), self.player)
+                    self.powerup_count += 1
             self.gun_timer()
+            self.powerup_timer()
             self.input()
             self.all_sprites.update(dt)
             self.bullet_collision()
@@ -163,45 +214,6 @@ class Game:
             self.display_score()
             self.display_lives()
             pygame.display.update()
-
-def load_high_score():
-    with open(join('..', 'data', 'high_score.txt'), 'r') as file:
-        content = file.read()
-        highscore = int(content.split("=")[1])
-        
-        return highscore
-
-def save_high_score(current_score):
-    with open(join('..', 'data', 'high_score.txt'), 'w') as file:
-        file.write('highscore=' + str(current_score))
-
-class HomeScreen:
-    def __init__(self, display_surface, background):
-        self.high_score = load_high_score()
-        self.waiting = True
-        self.display_surface = display_surface
-        self.background = background
-        self.font = pygame.font.Font(join('..', 'images', 'Oxanium-Bold.ttf'), 40)
-
-        # Draw homescreen
-        self.display_surface.blit(background, (0, 0))
-        self.display_high_score()
-        pygame.display.update()
-
-
-    def display_high_score(self):
-        self.text_surf = self.font.render('high score = ' +str(self.high_score), True, 'gray25')
-        self.text_rect = self.text_surf.get_frect(midbottom = (WINDOW_WIDTH / 2 - 180 ,WINDOW_HEIGHT - 180))
-        self.display_surface.blit(self.text_surf, self.text_rect)
-
-    def wait(self):
-        while self.waiting:
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN:
-                        return True
-                if event.type == pygame.QUIT:
-                    return False
 
 if __name__ == '__main__':
     # loop between creating homescreen and game objects

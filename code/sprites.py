@@ -63,11 +63,13 @@ class Gun(pygame.sprite.Sprite):
         self.rect.center = self.player.rect.center + (self.player_direction + pygame.Vector2(0, -0.2)) * self.distance
 
 class Powerup(pygame.sprite.Sprite):
-    def __init__(self, pos, surf, groups, player):
+    def __init__(self, pos, powerup, groups, player):
         super().__init__(groups)
         self.player = player
-        self.image = surf
+        self.image = powerup[1]
         self.rect = self.image.get_frect(center = pos)
+        self.type = powerup[0]
+
         self.animation_speed = 6
         self.position_offset = [0, 1, 0, -1]
         self.frame_index = 0
