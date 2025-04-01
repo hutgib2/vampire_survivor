@@ -26,6 +26,9 @@ class Game:
 
         #powerups
         self.powerup_count = 0
+        self.laser_activated = False
+        self.laser_time = 0
+        self.laser_cooldown = 3000
 
         #events
         self.enemy_event = pygame.event.custom_type()
@@ -69,8 +72,10 @@ class Game:
     
     def load_images(self):
         self.life_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'life.png')), (75, 75)).convert_alpha()
-        
-        self.powerup_surface = {'life':self.life_surf}
+        self.lasergun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'lasergun.png')), (75, 75)).convert_alpha()
+        self.laserbeam_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'laserbeam.png')), (WINDOW_WIDTH, 75)).convert_alpha()
+
+        self.powerup_surfaces = {'life':self.life_surf, 'laser': self.lasergun_surf}
 
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
         folders = list(walk(join('..', 'images', 'enemies')))[0][1]
@@ -103,6 +108,8 @@ class Game:
                 collision_sprites = pygame.sprite.spritecollide(bullet, self.enemy_sprites, False, pygame.sprite.collide_mask)
                 for enemy in collision_sprites:
                     if enemy.death_time == 0:
+                        if self.laser_activated:
+                            Bullet(self.laserbeam_surf, bullet.rect.center, pygame.math.Vector2(0,0), (self.all_sprites, self.bullet_sprites))
                         self.impact_sound.play()
                         enemy.destroy(False)
                         bullet.kill()
@@ -124,11 +131,18 @@ class Game:
     def powerup_collision(self):
         collision_sprites = pygame.sprite.spritecollide(self.player, self.powerup_sprites, True, pygame.sprite.collide_mask)
         for powerup in collision_sprites:
-            if self.player.lives < 3:
-                self.player.lives += 1
+            if (powerup.type == 'life'):
+                if self.player.lives < 3:
+                    self.player.lives += 1
+            if (powerup.type == 'laser'):
+                self.laser_activated = True
+                self.laser_time = pygame.time.get_ticks()
 
-    #def powerup_timer(self):
-        #
+    def powerup_timer(self):
+        if self.laser_activated:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.laser_time >= self.laser_cooldown:
+                self.laser_activated = False
 
 
     def get_spawn_position(self, spawn_positions):
@@ -146,7 +160,7 @@ class Game:
             valid_pos = True
             if (not self.powerup_sprites):
                 break
-            for powerup in powerup_sprites:
+            for powerup in self.powerup_sprites:
                 distance_from_powerup = pygame.math.Vector2.magnitude(pygame.math.Vector2(pos) - pygame.math.Vector2(powerup.rect.center))
                 if distance_from_powerup < 100:
                     valid_pos = False
@@ -173,8 +187,9 @@ class Game:
                 if event.type == self.enemy_event:
                     Enemy(self.get_spawn_position(self.enemy_spawn_positions), choice(list(self.enemy_frames.items())), (self.all_sprites, self.enemy_sprites), self.player, self.collision_sprites)
                 if event.type == self.powerup_event:
-                    Powerup(self.get_powerup_spawn_position(self.powerup_spawn_positions), choice(list(self.powerup_surfaces.items())), (self.all_sprites, self.powerup_sprites), self.player)
+                    Powerup(self.get_powerup_spawn_positions(self.powerup_spawn_positions), choice(list(self.powerup_surfaces.items())), (self.all_sprites, self.powerup_sprites), self.player)
             self.gun_timer()
+            self.powerup_timer()
             self.input()
             self.all_sprites.update(dt)
             self.bullet_collision()
