@@ -24,6 +24,9 @@ class Game:
         self.enemy_sprites = pygame.sprite.Group()
         self.powerup_sprites = pygame.sprite.Group()
 
+        #powerups
+        self.powerup_count = 0
+
         #events
         self.enemy_event = pygame.event.custom_type()
         pygame.time.set_timer(self.enemy_event, 300)
@@ -66,6 +69,9 @@ class Game:
     
     def load_images(self):
         self.life_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'life.png')), (75, 75)).convert_alpha()
+        
+        self.powerup_surface = {'life':self.life_surf}
+
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
         folders = list(walk(join('..', 'images', 'enemies')))[0][1]
         self.enemy_frames = {}
@@ -121,6 +127,9 @@ class Game:
             if self.player.lives < 3:
                 self.player.lives += 1
 
+    #def powerup_timer(self):
+        #
+
 
     def get_spawn_position(self, spawn_positions):
         distance_from_player = 0
@@ -129,6 +138,20 @@ class Game:
             distance_from_player = pygame.math.Vector2.magnitude(pygame.math.Vector2(pos) - pygame.math.Vector2(self.player.rect.center))
         return pos
     
+    def get_powerup_spawn_positions(self, spawn_positions):
+        distance_from_powerup = 0
+        valid_pos = False
+        while not valid_pos:
+            pos = choice(spawn_positions)
+            valid_pos = True
+            if (not self.powerup_sprites):
+                break
+            for powerup in powerup_sprites:
+                distance_from_powerup = pygame.math.Vector2.magnitude(pygame.math.Vector2(pos) - pygame.math.Vector2(powerup.rect.center))
+                if distance_from_powerup < 100:
+                    valid_pos = False
+        return pos
+
     def display_score(self):
         self.text_surf = self.font.render(str(self.kill_count), True, 'gray25')
         self.text_rect = self.text_surf.get_frect(topleft = (300, 25))
@@ -150,7 +173,7 @@ class Game:
                 if event.type == self.enemy_event:
                     Enemy(self.get_spawn_position(self.enemy_spawn_positions), choice(list(self.enemy_frames.items())), (self.all_sprites, self.enemy_sprites), self.player, self.collision_sprites)
                 if event.type == self.powerup_event:
-                    Powerup(self.get_spawn_position(self.powerup_spawn_positions), self.life_surf, (self.all_sprites, self.powerup_sprites), self.player)
+                    Powerup(self.get_powerup_spawn_position(self.powerup_spawn_positions), choice(list(self.powerup_surfaces.items())), (self.all_sprites, self.powerup_sprites), self.player)
             self.gun_timer()
             self.input()
             self.all_sprites.update(dt)
