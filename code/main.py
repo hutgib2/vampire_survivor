@@ -29,7 +29,9 @@ class Game:
         self.laser_activated = False
         self.laser_time = 0
         self.laser_cooldown = 5000
-
+        self.shotgun_activated = False
+        self.shotgun_time = 0
+        self.shotgun_cooldown = 5000
 
         # groups
         self.all_sprites = AllSprites()
@@ -80,12 +82,13 @@ class Game:
     
     def load_images(self):
         self.life_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'life.png')), (75, 75)).convert_alpha()
-        self.lasergun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'lasergun.png')), (75, 75)).convert_alpha()
-        self.laserbeam_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'laserbeam.png')), (WINDOW_WIDTH, 75)).convert_alpha()
         self.pierce_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'pierce.png')), (75, 75)).convert_alpha()
         self.machinegun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'machinegun.png')), (90, 90)).convert_alpha()
+        self.lasergun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'lasergun.png')), (75, 75)).convert_alpha()
+        self.laserbeam_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'laserbeam.png')), (WINDOW_WIDTH, 75)).convert_alpha()
+        self.shotgun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'shotgun.png')), (120, 36)).convert_alpha()
+        self.powerup_surfaces = {'life':self.life_surf, 'pierce':self.pierce_surf, 'machinegun':self.machinegun_surf, 'laser':self.lasergun_surf, 'shotgun':self.shotgun_surf}
 
-        self.powerup_surfaces = {'life':self.life_surf, 'pierce':self.pierce_surf, 'machinegun':self.machinegun_surf, 'laser':self.lasergun_surf}
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
         
         folders = list(walk(join('..', 'images', 'enemies')))[0][1]
@@ -103,6 +106,9 @@ class Game:
             self.shoot_sound.play()
             pos = self.gun.rect.center + self.gun.player_direction * 50
             Bullet(self.bullet_surf, pos, self.gun.player_direction, (self.all_sprites, self.bullet_sprites))
+            if self.shotgun_activated:
+                Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(45), (self.all_sprites, self.bullet_sprites))
+                Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(-45), (self.all_sprites, self.bullet_sprites))
             self.can_shoot = False
             self.shoot_time = pygame.time.get_ticks()
 
@@ -154,25 +160,33 @@ class Game:
             current_time = pygame.time.get_ticks()
             if current_time - self.laser_time >= self.laser_cooldown:
                 self.laser_activated = False
+        if self.shotgun_activated:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.shotgun_time >= self.shotgun_cooldown:
+                self.shotgun_activated = False
+
             
 
     def powerup_collision(self):
-        collision_sprites = pygame.sprite.spritecollide(self.player, self.powerup_sprites, True, pygame.sprite.collide_mask)
-        for powerup in collision_sprites:
+        powerup_collisions = pygame.sprite.spritecollide(self.player, self.powerup_sprites, True, pygame.sprite.collide_mask)
+        for powerup in powerup_collisions:
             self.powerup_count -= 1
             if powerup.type == 'life':
                 if self.player.lives < 3:
                     self.player.lives += 1
-            if powerup.type == 'pierce':
+            elif powerup.type == 'pierce':
                 self.pierce_time = pygame.time.get_ticks()
                 self.pierce_activated = True
-            if powerup.type == 'machinegun':
+            elif powerup.type == 'machinegun':
                 self.machinegun_time = pygame.time.get_ticks()
                 self.machinegun_activated = True
                 self.gun_cooldown /= 2
-            if powerup.type == 'laser':
+            elif powerup.type == 'laser':
                 self.laser_time = pygame.time.get_ticks()
                 self.laser_activated = True
+            elif powerup.type == 'shotgun':
+                self.shotgun_time = pygame.time.get_ticks()
+                self.shotgun_activated = True
 
 
     def get_spawn_position(self, spawn_positions):
