@@ -30,13 +30,28 @@ class Bullet(pygame.sprite.Sprite):
         if pygame.time.get_ticks() - self.spawn_time >= self.lifetime:
             self.kill()
 
+class Laser(pygame.sprite.Sprite):
+    def __init__(self, surf, pos, orientation, groups):
+        super().__init__(groups)
+        self.angle = orientation.angle_to(pygame.math.Vector2(0, 1))
+        self.image = pygame.transform.rotate(surf, self.angle)
+        self.rect = self.image.get_frect(center = pos)
+        self.spawn_time = pygame.time.get_ticks()
+        self.lifetime = 50
+        self.direction = pygame.math.Vector2(0,0)
+    
+    def update(self, dt):
+        if pygame.time.get_ticks() - self.spawn_time >= self.lifetime:
+            self.kill()
+
+
 class Gun(pygame.sprite.Sprite):
     def __init__(self, player, groups):
+        super().__init__(groups)
         self.player = player
         self.distance = 120
         self.player_direction = pygame.Vector2(1, -1)
 
-        super().__init__(groups)
         self.gun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'gun.png')), (100, 70)).convert_alpha()
         self.image = self.gun_surf
         self.rect = self.image.get_frect(center = self.player.rect.center + self.player_direction * self.distance)
@@ -66,9 +81,9 @@ class Powerup(pygame.sprite.Sprite):
     def __init__(self, pos, powerup, groups, player):
         super().__init__(groups)
         self.player = player
+        self.type = powerup[0]
         self.image = powerup[1]
         self.rect = self.image.get_frect(center = pos)
-        self.type = powerup[0]
 
         self.animation_speed = 6
         self.position_offset = [0, 1, 0, -1]
@@ -78,8 +93,6 @@ class Powerup(pygame.sprite.Sprite):
         self.frame_index += self.animation_speed * dt
         self.rect.centery += self.position_offset[int(self.frame_index) % len(self.position_offset)]
         
-
-
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, pos, framedata, groups, player, collision_sprites):

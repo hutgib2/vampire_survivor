@@ -20,15 +20,15 @@ class Game:
 
         #powerups
         self.powerup_count = 0
-        self.is_piercing = False
-        self.pierce_cooldown = 3000
+        self.pierce_activated = False
+        self.pierce_cooldown = 5000
         self.pierce_time = 0
-        self.machinegun_is_active = False
-        self.machinegun_cooldown = 3000
+        self.machinegun_activated = False
+        self.machinegun_cooldown = 5000
         self.machinegun_time = 0
         self.laser_activated = False
         self.laser_time = 0
-        self.laser_cooldown = 3000
+        self.laser_cooldown = 5000
 
 
         # groups
@@ -42,7 +42,7 @@ class Game:
         self.enemy_event = pygame.event.custom_type()
         pygame.time.set_timer(self.enemy_event, 300)
         self.powerup_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.powerup_event, 10000)
+        pygame.time.set_timer(self.powerup_event, 20000)
         self.enemy_spawn_positions = []
         self.powerup_spawn_positions = []
 
@@ -79,14 +79,13 @@ class Game:
                 self.enemy_spawn_positions.append((marker.x, marker.y))
     
     def load_images(self):
-        self.life_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'life.png')), (75, 75)).convert_alpha()
-        self.lasergun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'lasergun.png')), (75, 75)).convert_alpha()
-        self.laserbeam_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'laserbeam.png')), (WINDOW_WIDTH, 75)).convert_alpha()
+        self.life_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'life.png')), (75, 75)).convert_alpha()
+        self.lasergun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'lasergun.png')), (75, 75)).convert_alpha()
+        self.laserbeam_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'laserbeam.png')), (WINDOW_WIDTH, 75)).convert_alpha()
         self.pierce_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'pierce.png')), (75, 75)).convert_alpha()
         self.machinegun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'machinegun.png')), (90, 90)).convert_alpha()
+
         self.powerup_surfaces = {'life':self.life_surf, 'pierce':self.pierce_surf, 'machinegun':self.machinegun_surf, 'laser':self.lasergun_surf}
-
-
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
         
         folders = list(walk(join('..', 'images', 'enemies')))[0][1]
@@ -120,10 +119,10 @@ class Game:
                 for enemy in collision_sprites:
                     if enemy.death_time == 0:
                         if self.laser_activated:
-                            Bullet(self.laserbeam_surf, bullet.rect.center, pygame.math.Vector2(0,0), (self.all_sprites, self.bullet_sprites))
+                            Laser(self.laserbeam_surf, bullet.rect.center, bullet.direction, (self.all_sprites, self.bullet_sprites))
                         self.impact_sound.play()
                         enemy.destroy(False)
-                        if self.is_piercing == False:
+                        if self.pierce_activated == False:
                             bullet.kill()
                         self.kill_count += 1
                         break
@@ -142,14 +141,14 @@ class Game:
         return False
     
     def powerup_timer(self):
-        if self.is_piercing:
+        if self.pierce_activated:
             current_time = pygame.time.get_ticks()
             if current_time - self.pierce_time >= self.pierce_cooldown:
-                self.is_piercing = False
-        if self.machinegun_is_active:
+                self.pierce_activated = False
+        if self.machinegun_activated:
             current_time = pygame.time.get_ticks()
             if current_time - self.machinegun_time >= self.machinegun_cooldown:
-                self.machinegun_is_active = False
+                self.machinegun_activated = False
                 self.gun_cooldown *= 2
         if self.laser_activated:
             current_time = pygame.time.get_ticks()
@@ -160,8 +159,20 @@ class Game:
     def powerup_collision(self):
         collision_sprites = pygame.sprite.spritecollide(self.player, self.powerup_sprites, True, pygame.sprite.collide_mask)
         for powerup in collision_sprites:
-            if self.player.lives < 3:
-                self.player.lives += 1
+            self.powerup_count -= 1
+            if powerup.type == 'life':
+                if self.player.lives < 3:
+                    self.player.lives += 1
+            if powerup.type == 'pierce':
+                self.pierce_time = pygame.time.get_ticks()
+                self.pierce_activated = True
+            if powerup.type == 'machinegun':
+                self.machinegun_time = pygame.time.get_ticks()
+                self.machinegun_activated = True
+                self.gun_cooldown /= 2
+            if powerup.type == 'laser':
+                self.laser_time = pygame.time.get_ticks()
+                self.laser_activated = True
 
 
     def get_spawn_position(self, spawn_positions):
@@ -169,6 +180,21 @@ class Game:
         while distance_from_player < 700:
             pos = choice(spawn_positions)
             distance_from_player = pygame.math.Vector2.magnitude(pygame.math.Vector2(pos) - pygame.math.Vector2(self.player.rect.center))
+        return pos
+    
+
+    def get_powerup_spawn_position(self, spawn_positions):
+        distance_from_powerup = 0
+        valid_pos = False
+        while not valid_pos:
+            pos = choice(spawn_positions)
+            valid_pos = True
+            if not self.powerup_sprites:
+                return pos
+            for powerup in self.powerup_sprites:
+                distance_from_powerup = pygame.math.Vector2.magnitude(pygame.math.Vector2(pos) - pygame.math.Vector2(powerup.rect.center))
+                if distance_from_powerup < 100:
+                    valid_pos = False
         return pos
     
     def display_score(self):
@@ -190,8 +216,9 @@ class Game:
                     return False
                 if event.type == self.enemy_event:
                     Enemy(self.get_spawn_position(self.enemy_spawn_positions), choice(list(self.enemy_frames.items())), (self.all_sprites, self.enemy_sprites), self.player, self.collision_sprites)
-                if event.type == self.powerup_event:
-                    Powerup(self.get_spawn_position(self.powerup_spawn_positions), self.life_surf, (self.all_sprites, self.powerup_sprites), self.player)
+                if event.type == self.powerup_event and self.powerup_count < 5:
+                    self.powerup_count += 1
+                    Powerup(self.get_powerup_spawn_position(self.powerup_spawn_positions), choice(list(self.powerup_surfaces.items())), (self.all_sprites, self.powerup_sprites), self.player)
             self.gun_timer()
             self.powerup_timer()
             self.input()
