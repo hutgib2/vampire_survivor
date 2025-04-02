@@ -26,6 +26,10 @@ class Game:
         self.machinegun_is_active = False
         self.machinegun_cooldown = 3000
         self.machinegun_time = 0
+        self.laser_activated = False
+        self.laser_time = 0
+        self.laser_cooldown = 3000
+
 
         # groups
         self.all_sprites = AllSprites()
@@ -33,6 +37,7 @@ class Game:
         self.bullet_sprites = pygame.sprite.Group()
         self.enemy_sprites = pygame.sprite.Group()
         self.powerup_sprites = pygame.sprite.Group()
+
         #events
         self.enemy_event = pygame.event.custom_type()
         pygame.time.set_timer(self.enemy_event, 300)
@@ -74,12 +79,16 @@ class Game:
                 self.enemy_spawn_positions.append((marker.x, marker.y))
     
     def load_images(self):
-        self.life_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'life.png')), (75, 75)).convert_alpha()
+        self.life_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'life.png')), (75, 75)).convert_alpha()
+        self.lasergun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'lasergun.png')), (75, 75)).convert_alpha()
+        self.laserbeam_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'laserbeam.png')), (WINDOW_WIDTH, 75)).convert_alpha()
         self.pierce_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'pierce.png')), (75, 75)).convert_alpha()
         self.machinegun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'machinegun.png')), (90, 90)).convert_alpha()
-        self.powerup_surfaces = {'life':self.life_surf, 'pierce':self.pierce_surf, 'machinegun':self.machinegun_surf}
+        self.powerup_surfaces = {'life':self.life_surf, 'pierce':self.pierce_surf, 'machinegun':self.machinegun_surf, 'laser':self.lasergun_surf}
+
 
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
+        
         folders = list(walk(join('..', 'images', 'enemies')))[0][1]
         self.enemy_frames = {}
         for folder in folders:
@@ -110,6 +119,8 @@ class Game:
                 collision_sprites = pygame.sprite.spritecollide(bullet, self.enemy_sprites, False, pygame.sprite.collide_mask)
                 for enemy in collision_sprites:
                     if enemy.death_time == 0:
+                        if self.laser_activated:
+                            Bullet(self.laserbeam_surf, bullet.rect.center, pygame.math.Vector2(0,0), (self.all_sprites, self.bullet_sprites))
                         self.impact_sound.play()
                         enemy.destroy(False)
                         if self.is_piercing == False:
@@ -140,42 +151,24 @@ class Game:
             if current_time - self.machinegun_time >= self.machinegun_cooldown:
                 self.machinegun_is_active = False
                 self.gun_cooldown *= 2
+        if self.laser_activated:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.laser_time >= self.laser_cooldown:
+                self.laser_activated = False
             
 
     def powerup_collision(self):
         collision_sprites = pygame.sprite.spritecollide(self.player, self.powerup_sprites, True, pygame.sprite.collide_mask)
         for powerup in collision_sprites:
-            self.powerup_count -= 1
-            if powerup.type == 'life':
-                if self.player.lives < 3:
-                    self.player.lives += 1
-            if powerup.type == 'pierce':
-                self.pierce_time = pygame.time.get_ticks()
-                self.is_piercing = True
-            if powerup.type == 'machinegun':
-                self.gun_cooldown /= 2
-                self.machinegun_time = pygame.time.get_ticks()
-                self.machinegun_is_active = True
+            if self.player.lives < 3:
+                self.player.lives += 1
+
 
     def get_spawn_position(self, spawn_positions):
         distance_from_player = 0
         while distance_from_player < 700:
             pos = choice(spawn_positions)
             distance_from_player = pygame.math.Vector2.magnitude(pygame.math.Vector2(pos) - pygame.math.Vector2(self.player.rect.center))
-        return pos
-    
-    def get_powerup_spawn_position(self, spawn_positions):
-        distance_from_powerup = 0
-        valid_pos = False
-        while not valid_pos:
-            pos = choice(spawn_positions)
-            valid_pos = True
-            if not self.powerup_sprites:
-                break
-            for powerup in self.powerup_sprites:
-                distance_from_powerup = pygame.math.Vector2.magnitude(pygame.math.Vector2(pos) - pygame.math.Vector2(powerup.rect.center))
-                if distance_from_powerup < 100:
-                    valid_pos = False
         return pos
     
     def display_score(self):
@@ -189,7 +182,6 @@ class Game:
             self.life_rect = self.life_surf.get_frect(topleft = (10 + (i*85), 10))
             self.display_surface.blit(self.life_surf, self.life_rect)
         
-
     def run(self):
         while self.running:
             dt = self.clock.tick() / 1000
@@ -198,9 +190,8 @@ class Game:
                     return False
                 if event.type == self.enemy_event:
                     Enemy(self.get_spawn_position(self.enemy_spawn_positions), choice(list(self.enemy_frames.items())), (self.all_sprites, self.enemy_sprites), self.player, self.collision_sprites)
-                if event.type == self.powerup_event and self.powerup_count < 5:
-                    Powerup(self.get_powerup_spawn_position(self.powerup_spawn_positions), choice(list(self.powerup_surfaces.items())), (self.all_sprites, self.powerup_sprites), self.player)
-                    self.powerup_count += 1
+                if event.type == self.powerup_event:
+                    Powerup(self.get_spawn_position(self.powerup_spawn_positions), self.life_surf, (self.all_sprites, self.powerup_sprites), self.player)
             self.gun_timer()
             self.powerup_timer()
             self.input()
