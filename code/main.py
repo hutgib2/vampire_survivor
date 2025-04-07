@@ -32,6 +32,9 @@ class Game:
         self.shotgun_activated = False
         self.shotgun_time = 0
         self.shotgun_cooldown = 5000
+        self.sideshot_activated = False
+        self.sideshot_cooldown = 5000
+        self.sideshot_time = 0
 
         # groups
         self.all_sprites = AllSprites()
@@ -55,7 +58,7 @@ class Game:
         self.impact_sound.set_volume(0.3)
         self.music = pygame.mixer.Sound(join('..', 'audio', 'my_first_mashup.wav'))
         self.music.set_volume(0.55)
-        self.music.play(loops = 1)
+        self.music.play(loops = 0)
         
         self.load_images()
         self.setup()
@@ -87,7 +90,8 @@ class Game:
         self.lasergun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'lasergun.png')), (75, 75)).convert_alpha()
         self.laserbeam_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'laserbeam.png')), (WINDOW_WIDTH, 75)).convert_alpha()
         self.shotgun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'shotgun.png')), (120, 36)).convert_alpha()
-        self.powerup_surfaces = {'life':self.life_surf, 'pierce':self.pierce_surf, 'machinegun':self.machinegun_surf, 'laser':self.lasergun_surf, 'shotgun':self.shotgun_surf}
+        self.sideshot_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'sideshot.png')), (75, 75)).convert_alpha()
+        self.powerup_surfaces = {'life':self.life_surf, 'pierce':self.pierce_surf, 'machinegun':self.machinegun_surf, 'laser':self.lasergun_surf, 'shotgun':self.shotgun_surf, 'sideshot':self.sideshot_surf}
 
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
         
@@ -109,6 +113,10 @@ class Game:
             if self.shotgun_activated:
                 Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(45), (self.all_sprites, self.bullet_sprites))
                 Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(-45), (self.all_sprites, self.bullet_sprites))
+            if self.sideshot_activated:
+                Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(90), (self.all_sprites, self.bullet_sprites))
+                Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(-90), (self.all_sprites, self.bullet_sprites))
+                Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(180), (self.all_sprites, self.bullet_sprites))
             self.can_shoot = False
             self.shoot_time = pygame.time.get_ticks()
 
@@ -164,6 +172,10 @@ class Game:
             current_time = pygame.time.get_ticks()
             if current_time - self.shotgun_time >= self.shotgun_cooldown:
                 self.shotgun_activated = False
+        if self.sideshot_activated:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.sideshot_time >= self.sideshot_cooldown:
+                self.sideshot_activated = False
 
             
 
@@ -187,6 +199,9 @@ class Game:
             elif powerup.type == 'shotgun':
                 self.shotgun_time = pygame.time.get_ticks()
                 self.shotgun_activated = True
+            elif powerup.type == 'sideshot':
+                self.sideshot_time = pygame.time.get_ticks()
+                self.sideshot_activated = True
 
 
     def get_spawn_position(self, spawn_positions):

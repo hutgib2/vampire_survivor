@@ -1,1 +1,1 @@
-highscore=477
+highscore=746
