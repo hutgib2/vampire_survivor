@@ -44,15 +44,20 @@ class Laser(pygame.sprite.Sprite):
         if pygame.time.get_ticks() - self.spawn_time >= self.lifetime:
             self.kill()
 
-
-class Gun(pygame.sprite.Sprite):
-    def __init__(self, player, groups):
-        super().__init__(groups)
+class Pistol(pygame.sprite.Sprite):
+    def __init__(self, surf, bullet_surf, player, game):
+        super().__init__(game.all_sprites)
         self.player = player
         self.distance = 120
         self.player_direction = pygame.Vector2(1, -1)
+        self.game = game
 
-        self.gun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'gun.png')), (100, 70)).convert_alpha()
+        self.can_shoot = True
+        self.shoot_time = 0
+        self.gun_cooldown = 250
+        self.bullet_surf = bullet_surf
+
+        self.gun_surf = surf
         self.image = self.gun_surf
         self.rect = self.image.get_frect(center = self.player.rect.center + self.player_direction * self.distance)
     
@@ -71,11 +76,53 @@ class Gun(pygame.sprite.Sprite):
         else:
             self.image = pygame.transform.rotozoom(self.gun_surf, abs(angle), 1)
             self.image = pygame.transform.flip(self.image, False, True)
-    
+
+    def fire(self):
+        if pygame.mouse.get_pressed()[0] and self.can_shoot:
+            self.game.shoot_sound.play()
+            pos = self.rect.center + self.player_direction * 50
+            Bullet(self.bullet_surf, pos, self.player_direction, (self.game.all_sprites, self.game.bullet_sprites))
+            self.can_shoot = False
+            self.shoot_time = pygame.time.get_ticks()
+
+    def timer(self):
+        if not self.can_shoot:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.shoot_time >= self.gun_cooldown:
+                self.can_shoot = True
+
     def update(self, _):
         self.get_direction()
         self.rotate_gun()
         self.rect.center = self.player.rect.center + (self.player_direction + pygame.Vector2(0, -0.2)) * self.distance
+        self.timer()
+        self.fire()
+
+class Shotgun(pygame.sprite.Sprite):
+    def __init__(self, surf, bullet_surf, player, game):
+        super().__init__(game.all_sprites)
+        self.player = player
+        self.distance = 120
+        self.player_direction = pygame.Vector2(1, -1)
+        self.game = game
+
+        self.can_shoot = True
+        self.shoot_time = 0
+        self.gun_cooldown = 250
+        self.bullet_surf = bullet_surf
+
+        self.gun_surf = surf
+        self.image = self.gun_surf
+        self.rect = self.image.get_frect(center = self.player.rect.center + self.player_direction * self.distance)
+    
+            # if self.shotgun_activated:
+            #     Bullet(self.bullet_surf, pos, self.weapon.player_direction.rotate(45), (self.all_sprites, self.bullet_sprites))
+            #     Bullet(self.bullet_surf, pos, self.weapon.player_direction.rotate(-45), (self.all_sprites, self.bullet_sprites))
+            # if self.sideshot_activated:
+            #     Bullet(self.bullet_surf, pos, self.weapon.player_direction.rotate(90), (self.all_sprites, self.bullet_sprites))
+            #     Bullet(self.bullet_surf, pos, self.weapon.player_direction.rotate(-90), (self.all_sprites, self.bullet_sprites))
+            #     Bullet(self.bullet_surf, pos, self.weapon.player_direction.rotate(180), (self.all_sprites, self.bullet_sprites))
+
 
 class Powerup(pygame.sprite.Sprite):
     def __init__(self, pos, powerup, groups, player):

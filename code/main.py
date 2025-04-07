@@ -12,9 +12,6 @@ class Game:
         self.running = True
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font(join('..', 'images', 'Oxanium-Bold.ttf'), 40)
-        self.can_shoot = True
-        self.shoot_time = 0
-        self.gun_cooldown = 250
         self.kill_count = 0
         self.high_score = load_high_score()
 
@@ -56,9 +53,6 @@ class Game:
         self.shoot_sound.set_volume(0.2)
         self.impact_sound = pygame.mixer.Sound(join('..', 'audio', 'new_impact.ogg'))
         self.impact_sound.set_volume(0.3)
-        self.music = pygame.mixer.Sound(join('..', 'audio', 'my_first_mashup.wav'))
-        self.music.set_volume(0.55)
-        self.music.play(loops = 0)
         
         self.load_images()
         self.setup()
@@ -77,7 +71,7 @@ class Game:
         for marker in map.get_layer_by_name('Entities'):
             if marker.name == 'Player':
                 self.player = Player((marker.x, marker.y), self.all_sprites, self.collision_sprites)
-                self.gun = Gun(self.player, self.all_sprites)
+                self.weapon = Pistol(self.pistol_surf, self.bullet_surf, self.player, self)
             elif marker.name == 'Power up':
                 self.powerup_spawn_positions.append((marker.x, marker.y))
             else:
@@ -94,7 +88,7 @@ class Game:
         self.powerup_surfaces = {'life':self.life_surf, 'pierce':self.pierce_surf, 'machinegun':self.machinegun_surf, 'laser':self.lasergun_surf, 'shotgun':self.shotgun_surf, 'sideshot':self.sideshot_surf}
 
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
-        
+        self.pistol_surf =  pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'gun.png')), (100, 70)).convert_alpha()
         folders = list(walk(join('..', 'images', 'enemies')))[0][1]
         self.enemy_frames = {}
         for folder in folders:
@@ -105,27 +99,6 @@ class Game:
                     surf = pygame.image.load(full_path).convert_alpha()
                     self.enemy_frames[folder].append(surf)
 
-    def input(self):
-        if pygame.mouse.get_pressed()[0] and self.can_shoot:
-            self.shoot_sound.play()
-            pos = self.gun.rect.center + self.gun.player_direction * 50
-            Bullet(self.bullet_surf, pos, self.gun.player_direction, (self.all_sprites, self.bullet_sprites))
-            if self.shotgun_activated:
-                Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(45), (self.all_sprites, self.bullet_sprites))
-                Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(-45), (self.all_sprites, self.bullet_sprites))
-            if self.sideshot_activated:
-                Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(90), (self.all_sprites, self.bullet_sprites))
-                Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(-90), (self.all_sprites, self.bullet_sprites))
-                Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(180), (self.all_sprites, self.bullet_sprites))
-            self.can_shoot = False
-            self.shoot_time = pygame.time.get_ticks()
-
-    def gun_timer(self):
-        if not self.can_shoot:
-            current_time = pygame.time.get_ticks()
-            if current_time - self.shoot_time >= self.gun_cooldown:
-                self.can_shoot = True
-    
     def bullet_collision(self):
         if self.bullet_sprites:
             for bullet in self.bullet_sprites:
@@ -248,14 +221,11 @@ class Game:
                 if event.type == self.powerup_event and self.powerup_count < 5:
                     self.powerup_count += 1
                     Powerup(self.get_powerup_spawn_position(self.powerup_spawn_positions), choice(list(self.powerup_surfaces.items())), (self.all_sprites, self.powerup_sprites), self.player)
-            self.gun_timer()
             self.powerup_timer()
-            self.input()
             self.all_sprites.update(dt)
             self.bullet_collision()
             self.powerup_collision()
             if self.player_collision():
-                self.music.stop()
                 return True
             self.all_sprites.draw(self.player.rect.center)
             self.display_score()
@@ -270,8 +240,9 @@ if __name__ == '__main__':
     pygame.display.set_caption("Vampire Survivor")
     home_screen_image = pygame.transform.scale(pygame.image.load(join('..', 'images', 'home_screen.png')), (WINDOW_WIDTH, WINDOW_HEIGHT))
     game_over_screen = pygame.transform.scale(pygame.image.load(join('..', 'images', 'game_over.png')), (WINDOW_WIDTH, WINDOW_HEIGHT))
-    homescreen = HomeScreen(display_surface, home_screen_image)
-    is_running = homescreen.wait()
+#    homescreen = HomeScreen(display_surface, home_screen_image)
+#    is_running = homescreen.wait()
+    is_running = True
     while is_running:
         game = Game(display_surface)
         is_running = game.run()
