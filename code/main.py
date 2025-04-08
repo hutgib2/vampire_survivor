@@ -13,9 +13,6 @@ class Game:
         self.running = True
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font(join('..', 'images', 'Oxanium-Bold.ttf'), 40)
-        self.can_shoot = True
-        self.shoot_time = 0
-        self.gun_cooldown = 250
         self.kill_count = 0
         self.high_score = load_high_score()
 
@@ -81,7 +78,7 @@ class Game:
         for marker in map.get_layer_by_name('Entities'):
             if marker.name == 'Player':
                 self.player = Player((marker.x, marker.y), self.all_sprites, self.collision_sprites)
-                self.gun = Gun(self.gun_surf, 120, self.player, self.all_sprites)
+                self.gun = Gun(self.gun_surf, 120, self.player, self.all_sprites, self)
             elif marker.name == 'Power up':
                 self.powerup_spawn_positions.append((marker.x, marker.y))
             else:
@@ -109,27 +106,6 @@ class Game:
                     full_path = join(folder_path, file_name)
                     surf = pygame.image.load(full_path).convert_alpha()
                     self.enemy_frames[folder].append(surf)
-
-    def gun_shot(self):
-        if pygame.mouse.get_pressed()[0] and self.can_shoot:
-            self.shoot_sound.play()
-            pos = self.gun.rect.center + self.gun.player_direction * 50
-            Bullet(self.bullet_surf, pos, self.gun.player_direction, (self.all_sprites, self.bullet_sprites))
-            if self.shotgun_activated:
-                Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(45), (self.all_sprites, self.bullet_sprites))
-                Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(-45), (self.all_sprites, self.bullet_sprites))
-            if self.sideshot_activated:
-                Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(90), (self.all_sprites, self.bullet_sprites))
-                Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(-90), (self.all_sprites, self.bullet_sprites))
-                Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(180), (self.all_sprites, self.bullet_sprites))
-            self.can_shoot = False
-            self.shoot_time = pygame.time.get_ticks()
-
-    def gun_timer(self):
-        if not self.can_shoot:
-            current_time = pygame.time.get_ticks()
-            if current_time - self.shoot_time >= self.gun_cooldown:
-                self.can_shoot = True
     
     def bullet_collision(self):
         if self.bullet_sprites:
@@ -264,9 +240,7 @@ class Game:
                 if event.type == self.powerup_event and self.powerup_count < 5:
                     self.powerup_count += 1
                     Powerup(self.get_powerup_spawn_position(self.powerup_spawn_positions), choice(list(self.powerup_surfaces.items())), (self.all_sprites, self.powerup_sprites), self.player)
-            self.gun_timer()
             self.powerup_timer()
-            self.gun_shot()
             self.all_sprites.update(dt)
             self.bullet_collision()
             self.powerup_collision()
