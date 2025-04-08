@@ -5,6 +5,7 @@ from random import randint, choice
 from pytmx.util_pygame import load_pygame
 from groups import AllSprites
 from homescreen import *
+from weapons import Gun
 
 class Game:
     def __init__(self, display_surface): # Constructor 
@@ -35,6 +36,9 @@ class Game:
         self.sideshot_activated = False
         self.sideshot_cooldown = 5000
         self.sideshot_time = 0
+        self.knife_activated = False
+        self.knife_cooldown = 5000
+        self.knife_time = 0
 
         # groups
         self.all_sprites = AllSprites()
@@ -47,7 +51,7 @@ class Game:
         self.enemy_event = pygame.event.custom_type()
         pygame.time.set_timer(self.enemy_event, 300)
         self.powerup_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.powerup_event, 20000)
+        pygame.time.set_timer(self.powerup_event, 2000)
         self.enemy_spawn_positions = []
         self.powerup_spawn_positions = []
 
@@ -77,7 +81,7 @@ class Game:
         for marker in map.get_layer_by_name('Entities'):
             if marker.name == 'Player':
                 self.player = Player((marker.x, marker.y), self.all_sprites, self.collision_sprites)
-                self.gun = Gun(self.player, self.all_sprites)
+                self.gun = Gun(self.gun_surf, 120, self.player, self.all_sprites)
             elif marker.name == 'Power up':
                 self.powerup_spawn_positions.append((marker.x, marker.y))
             else:
@@ -90,11 +94,12 @@ class Game:
         self.lasergun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'lasergun.png')), (75, 75)).convert_alpha()
         self.laserbeam_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'laserbeam.png')), (WINDOW_WIDTH, 75)).convert_alpha()
         self.shotgun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'shotgun.png')), (120, 36)).convert_alpha()
-        self.sideshot_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'sideshot.png')), (75, 75)).convert_alpha()
-        self.powerup_surfaces = {'life':self.life_surf, 'pierce':self.pierce_surf, 'machinegun':self.machinegun_surf, 'laser':self.lasergun_surf, 'shotgun':self.shotgun_surf, 'sideshot':self.sideshot_surf}
+        self.sideshot_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'sideshot.png')), (100, 50)).convert_alpha()
+        self.knife_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'knife.png')), (100, 70)).convert_alpha()
+        self.powerup_surfaces = {'life':self.life_surf, 'pierce':self.pierce_surf, 'machinegun':self.machinegun_surf, 'laser':self.lasergun_surf, 'shotgun':self.shotgun_surf, 'sideshot':self.sideshot_surf, 'knife':self.knife_surf}
 
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
-        
+        self.gun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'gun.png')), (100, 70)).convert_alpha()
         folders = list(walk(join('..', 'images', 'enemies')))[0][1]
         self.enemy_frames = {}
         for folder in folders:
@@ -105,7 +110,7 @@ class Game:
                     surf = pygame.image.load(full_path).convert_alpha()
                     self.enemy_frames[folder].append(surf)
 
-    def input(self):
+    def gun_shot(self):
         if pygame.mouse.get_pressed()[0] and self.can_shoot:
             self.shoot_sound.play()
             pos = self.gun.rect.center + self.gun.player_direction * 50
@@ -176,7 +181,12 @@ class Game:
             current_time = pygame.time.get_ticks()
             if current_time - self.sideshot_time >= self.sideshot_cooldown:
                 self.sideshot_activated = False
-
+        if self.knife_activated:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.knife_time >= self.knife_cooldown:
+                self.knife_activated = False
+                self.gun.kill()
+                self.gun = Gun(self.gun_surf, 70, self.player, self.all_sprites)
             
 
     def powerup_collision(self):
@@ -202,6 +212,12 @@ class Game:
             elif powerup.type == 'sideshot':
                 self.sideshot_time = pygame.time.get_ticks()
                 self.sideshot_activated = True
+            elif powerup.type == 'knife':
+                self.knife_time = pygame.time.get_ticks()
+                self.knife_activated = True
+                self.gun.kill()
+                self.gun = Gun(pygame.transform.scale(self.knife_surf, (150, 75)), 120, self.player, self.all_sprites)
+
 
 
     def get_spawn_position(self, spawn_positions):
@@ -250,7 +266,7 @@ class Game:
                     Powerup(self.get_powerup_spawn_position(self.powerup_spawn_positions), choice(list(self.powerup_surfaces.items())), (self.all_sprites, self.powerup_sprites), self.player)
             self.gun_timer()
             self.powerup_timer()
-            self.input()
+            self.gun_shot()
             self.all_sprites.update(dt)
             self.bullet_collision()
             self.powerup_collision()
