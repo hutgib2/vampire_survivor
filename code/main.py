@@ -5,7 +5,7 @@ from random import randint, choice
 from pytmx.util_pygame import load_pygame
 from groups import AllSprites
 from homescreen import *
-from weapons import Gun
+from weapons import Gun, Shotgun, Machinegun, Lasergun, Knife
 
 class Game:
     def __init__(self, display_surface): # Constructor 
@@ -18,24 +18,9 @@ class Game:
 
         #powerups
         self.powerup_count = 0
-        self.pierce_activated = False
-        self.pierce_cooldown = 5000
-        self.pierce_time = 0
-        self.machinegun_activated = False
-        self.machinegun_cooldown = 5000
-        self.machinegun_time = 0
-        self.laser_activated = False
-        self.laser_time = 0
-        self.laser_cooldown = 5000
-        self.shotgun_activated = False
-        self.shotgun_time = 0
-        self.shotgun_cooldown = 5000
-        self.sideshot_activated = False
-        self.sideshot_cooldown = 5000
-        self.sideshot_time = 0
-        self.knife_activated = False
-        self.knife_cooldown = 5000
-        self.knife_time = 0
+        self.powerup_activated = False
+        self.powerup_cooldown = 5000
+        self.powerup_time = 0
 
         # groups
         self.all_sprites = AllSprites()
@@ -68,17 +53,14 @@ class Game:
         map = load_pygame(join('..', 'data', 'maps', 'world.tmx'))
         for x, y, image in map.get_layer_by_name('Ground').tiles():
             Sprite((x * TILE_SIZE, y * TILE_SIZE), image, self.all_sprites)
-
         for obj in map.get_layer_by_name('Objects'):
             CollisionSprite((obj.x, obj.y), obj.image, (self.all_sprites, self.collision_sprites))
-
         for collision in map.get_layer_by_name('Collisions'):
             CollisionSprite((collision.x, collision.y), pygame.Surface((collision.width, collision.height)), self.collision_sprites)
-
         for marker in map.get_layer_by_name('Entities'):
             if marker.name == 'Player':
                 self.player = Player((marker.x, marker.y), self.all_sprites, self.collision_sprites)
-                self.gun = Gun(self.gun_surf, 120, self.player, self.all_sprites, self)
+                self.gun = Gun(self.gun_surf, self.player, self.all_sprites, self)
             elif marker.name == 'Power up':
                 self.powerup_spawn_positions.append((marker.x, marker.y))
             else:
@@ -89,11 +71,12 @@ class Game:
         self.pierce_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'pierce.png')), (75, 75)).convert_alpha()
         self.machinegun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'machinegun.png')), (90, 90)).convert_alpha()
         self.lasergun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'lasergun.png')), (75, 75)).convert_alpha()
-        self.laserbeam_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'laserbeam.png')), (WINDOW_WIDTH, 75)).convert_alpha()
+        self.lasergun_surf = pygame.transform.flip(self.lasergun_surf, True, False)
+        self.laser_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'laserbeam.png')), (WINDOW_WIDTH, 75)).convert_alpha()
         self.shotgun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'shotgun.png')), (120, 36)).convert_alpha()
         self.sideshot_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'sideshot.png')), (100, 50)).convert_alpha()
-        self.knife_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'knife.png')), (100, 70)).convert_alpha()
-        self.powerup_surfaces = {'life':self.life_surf, 'pierce':self.pierce_surf, 'machinegun':self.machinegun_surf, 'laser':self.lasergun_surf, 'shotgun':self.shotgun_surf, 'sideshot':self.sideshot_surf, 'knife':self.knife_surf}
+        self.knife_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'knife.png')), (140, 90)).convert_alpha()
+        self.powerup_surfaces = {'life':self.life_surf, 'machinegun':self.machinegun_surf, 'laser':self.lasergun_surf, 'shotgun':self.shotgun_surf, 'knife':self.knife_surf}
 
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
         self.gun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'gun.png')), (100, 70)).convert_alpha()
@@ -107,21 +90,6 @@ class Game:
                     surf = pygame.image.load(full_path).convert_alpha()
                     self.enemy_frames[folder].append(surf)
     
-    def bullet_collision(self):
-        if self.bullet_sprites:
-            for bullet in self.bullet_sprites:
-                collision_sprites = pygame.sprite.spritecollide(bullet, self.enemy_sprites, False, pygame.sprite.collide_mask)
-                for enemy in collision_sprites:
-                    if enemy.death_time == 0:
-                        if self.laser_activated:
-                            Laser(self.laserbeam_surf, bullet.rect.center, bullet.direction, (self.all_sprites, self.bullet_sprites))
-                        self.impact_sound.play()
-                        enemy.destroy(False)
-                        if self.pierce_activated == False:
-                            bullet.kill()
-                        self.kill_count += 1
-                        break
-
     def player_collision(self):
         collision_sprites = pygame.sprite.spritecollide(self.player, self.enemy_sprites, False, pygame.sprite.collide_mask)
         for enemy in collision_sprites:
@@ -136,34 +104,12 @@ class Game:
         return False
     
     def powerup_timer(self):
-        if self.pierce_activated:
+        if self.powerup_activated:
             current_time = pygame.time.get_ticks()
-            if current_time - self.pierce_time >= self.pierce_cooldown:
-                self.pierce_activated = False
-        if self.machinegun_activated:
-            current_time = pygame.time.get_ticks()
-            if current_time - self.machinegun_time >= self.machinegun_cooldown:
-                self.machinegun_activated = False
-                self.gun_cooldown *= 2
-        if self.laser_activated:
-            current_time = pygame.time.get_ticks()
-            if current_time - self.laser_time >= self.laser_cooldown:
-                self.laser_activated = False
-        if self.shotgun_activated:
-            current_time = pygame.time.get_ticks()
-            if current_time - self.shotgun_time >= self.shotgun_cooldown:
-                self.shotgun_activated = False
-        if self.sideshot_activated:
-            current_time = pygame.time.get_ticks()
-            if current_time - self.sideshot_time >= self.sideshot_cooldown:
-                self.sideshot_activated = False
-        if self.knife_activated:
-            current_time = pygame.time.get_ticks()
-            if current_time - self.knife_time >= self.knife_cooldown:
-                self.knife_activated = False
+            if current_time - self.powerup_time >= self.powerup_cooldown:
+                self.powerup_activated = False
                 self.gun.kill()
-                self.gun = Gun(self.gun_surf, 70, self.player, self.all_sprites)
-            
+                self.gun = Gun(self.gun_surf, self.player, self.all_sprites, self)
 
     def powerup_collision(self):
         powerup_collisions = pygame.sprite.spritecollide(self.player, self.powerup_sprites, True, pygame.sprite.collide_mask)
@@ -172,29 +118,20 @@ class Game:
             if powerup.type == 'life':
                 if self.player.lives < 3:
                     self.player.lives += 1
-            elif powerup.type == 'pierce':
-                self.pierce_time = pygame.time.get_ticks()
-                self.pierce_activated = True
-            elif powerup.type == 'machinegun':
-                self.machinegun_time = pygame.time.get_ticks()
-                self.machinegun_activated = True
-                self.gun_cooldown /= 2
+                continue
+            self.powerup_time = pygame.time.get_ticks()
+            self.powerup_activated = True
+            self.gun.kill()
+            if powerup.type == 'machinegun':
+                self.gun = Machinegun(self.machinegun_surf, self.player, self.all_sprites, self)
             elif powerup.type == 'laser':
-                self.laser_time = pygame.time.get_ticks()
-                self.laser_activated = True
+                self.gun = Lasergun(self.lasergun_surf, self.player, self.all_sprites, self)
             elif powerup.type == 'shotgun':
-                self.shotgun_time = pygame.time.get_ticks()
-                self.shotgun_activated = True
+                self.gun = Shotgun(self.shotgun_surf, self.player, self.all_sprites, self)
             elif powerup.type == 'sideshot':
-                self.sideshot_time = pygame.time.get_ticks()
-                self.sideshot_activated = True
+                pass
             elif powerup.type == 'knife':
-                self.knife_time = pygame.time.get_ticks()
-                self.knife_activated = True
-                self.gun.kill()
-                self.gun = Gun(pygame.transform.scale(self.knife_surf, (150, 75)), 120, self.player, self.all_sprites)
-
-
+                self.gun = Knife(self.knife_surf, self.player, self.all_sprites, self)
 
     def get_spawn_position(self, spawn_positions):
         distance_from_player = 0
@@ -203,7 +140,6 @@ class Game:
             distance_from_player = pygame.math.Vector2.magnitude(pygame.math.Vector2(pos) - pygame.math.Vector2(self.player.rect.center))
         return pos
     
-
     def get_powerup_spawn_position(self, spawn_positions):
         distance_from_powerup = 0
         valid_pos = False
@@ -242,7 +178,6 @@ class Game:
                     Powerup(self.get_powerup_spawn_position(self.powerup_spawn_positions), choice(list(self.powerup_surfaces.items())), (self.all_sprites, self.powerup_sprites), self.player)
             self.powerup_timer()
             self.all_sprites.update(dt)
-            self.bullet_collision()
             self.powerup_collision()
             if self.player_collision():
                 self.music.stop()
@@ -253,8 +188,6 @@ class Game:
             pygame.display.update()
 
 if __name__ == '__main__':
-    # loop between creating homescreen and game objects
-    # this will reset the games memory each time so we can start clean
     pygame.init()
     display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Vampire Survivor")
