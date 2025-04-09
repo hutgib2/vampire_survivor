@@ -1,6 +1,5 @@
 from settings import *
 from math import atan2, degrees
-from sprites import Bullet
 
 class Gun(pygame.sprite.Sprite):
     def __init__(self, surf, player, groups, game):
@@ -132,6 +131,21 @@ class Machinegun(Gun):
         self.shoot_time = 0
         self.cooldown = 125
 
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, surf, pos, direction, groups):
+        super().__init__(groups)
+        self.image = surf
+        self.rect = self.image.get_frect(center = pos) 
+        self.spawn_time = pygame.time.get_ticks()
+        self.lifetime = 1000
+        self.direction = direction
+        self.speed = 1200
+    
+    def update(self, dt):
+        self.rect.center += self.direction * self.speed * dt
+        if pygame.time.get_ticks() - self.spawn_time >= self.lifetime:
+            self.kill()
+
 class Laser(pygame.sprite.Sprite):
     def __init__(self, surf, pos, orientation, groups):
         super().__init__(groups)
@@ -160,7 +174,6 @@ class Lasergun(Gun):
         self.shoot_time = 0
         self.cooldown = 250
 
-
     def bullet_collision(self):
         for bullet in self.game.bullet_sprites:
             collision_sprites = pygame.sprite.spritecollide(bullet, self.game.enemy_sprites, False, pygame.sprite.collide_mask)
@@ -169,9 +182,28 @@ class Lasergun(Gun):
                     self.game.impact_sound.play()
                     enemy.destroy(False)
                     self.game.kill_count += 1
-                    Laser(self.game.laser_surf, enemy.rect.center, bullet.direction, (self.game.all_sprites, self.game.bullet_sprites))
+                    Laser(self.game.laser_surf, enemy.rect.center, bullet.direction, (self.game.all_sprites, self.game.laser_sprites))
                     bullet.kill()
                     break
+
+    def laser_collision(self):
+        for laser in self.game.laser_sprites:
+            collision_sprites = pygame.sprite.spritecollide(laser, self.game.enemy_sprites, False, pygame.sprite.collide_mask)
+            for enemy in collision_sprites:
+                if enemy.death_time == 0:
+                    self.game.impact_sound.play()
+                    enemy.destroy(False)
+                    self.game.kill_count += 1
+                    break
+
+    def update(self, _):
+        self.get_direction()
+        self.rotate()
+        self.rect.center = self.player.rect.center + (self.player_direction + pygame.Vector2(0, -0.2)) * self.distance
+        self.shoot_timer()
+        self.shoot()
+        self.bullet_collision()
+        self.laser_collision()
 
 class Knife(Gun):
     def __init__(self, surf, player, groups, game):

@@ -28,12 +28,13 @@ class Game:
         self.bullet_sprites = pygame.sprite.Group()
         self.enemy_sprites = pygame.sprite.Group()
         self.powerup_sprites = pygame.sprite.Group()
+        self.laser_sprites = pygame.sprite.Group()
 
         #events
         self.enemy_event = pygame.event.custom_type()
         pygame.time.set_timer(self.enemy_event, 300)
         self.powerup_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.powerup_event, 2000)
+        pygame.time.set_timer(self.powerup_event, 4000)
         self.enemy_spawn_positions = []
         self.powerup_spawn_positions = []
 

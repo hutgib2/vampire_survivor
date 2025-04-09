@@ -1,6 +1,6 @@
 from settings import *
 from math import atan2, degrees
-# ('..', 'images', 'gun', 'bullet.png')
+
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, pos, surf, groups):
         super().__init__(groups)
@@ -13,24 +13,6 @@ class CollisionSprite(pygame.sprite.Sprite):
         super().__init__(groups)
         self.image = surf
         self.rect = self.image.get_frect(topleft = pos)
-
-class Bullet(pygame.sprite.Sprite):
-    def __init__(self, surf, pos, direction, groups):
-        super().__init__(groups)
-        self.image = surf
-        self.rect = self.image.get_frect(center = pos) 
-        self.spawn_time = pygame.time.get_ticks() # it stores the time when the bullet is created
-        self.lifetime = 1000
-        self.direction = direction
-        self.speed = 1200
-    
-    def update(self, dt):
-        self.rect.center += self.direction * self.speed * dt
-        # current_time - spawn_time = time elapsed since bullet was summoned
-        if pygame.time.get_ticks() - self.spawn_time >= self.lifetime:
-            self.kill()
-
-
 
 class Powerup(pygame.sprite.Sprite):
     def __init__(self, pos, powerup, groups, player):
