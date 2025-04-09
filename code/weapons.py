@@ -64,12 +64,6 @@ class Gun(pygame.sprite.Sprite):
         self.shoot()
         self.bullet_collision()
 
-
-            # if self.sideshot_activated:
-            #     Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(90), (self.all_sprites, self.bullet_sprites))
-            #     Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(-90), (self.all_sprites, self.bullet_sprites))
-            #     Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(180), (self.all_sprites, self.bullet_sprites))
-
 class PiercingGun(Gun):
     def __init__(self, surf, player, groups, game):
         super().__init__(surf, player, groups, game)
@@ -114,6 +108,31 @@ class Shotgun(Gun):
             Bullet(self.game.bullet_surf, pos, self.player_direction, (self.game.all_sprites, self.game.bullet_sprites))
             Bullet(self.game.bullet_surf, pos, self.player_direction.rotate(45), (self.game.all_sprites, self.game.bullet_sprites))
             Bullet(self.game.bullet_surf, pos, self.player_direction.rotate(-45), (self.game.all_sprites, self.game.bullet_sprites))
+            self.can_shoot = False
+            self.shoot_time = pygame.time.get_ticks()
+
+class Sideshotgun(Gun):
+    def __init__(self, surf, player, groups, game):
+        super().__init__(surf, player, groups, game)
+        self.player = player
+        self.distance = 120
+        self.game = game
+        self.player_direction = pygame.Vector2(1, -1)
+        self.shotgun_surf = surf
+        self.image = self.shotgun_surf
+        self.rect = self.image.get_frect(center = self.player.rect.center + self.player_direction * self.distance)
+        self.can_shoot = True
+        self.shoot_time = 0
+        self.cooldown = 250
+
+    def shoot(self):
+        if pygame.mouse.get_pressed()[0] and self.can_shoot:
+            self.game.shoot_sound.play()
+            pos = self.rect.center + self.player_direction * 64
+            Bullet(self.game.bullet_surf, pos, self.player_direction, (self.game.all_sprites, self.game.bullet_sprites))
+            Bullet(self.game.bullet_surf, pos, self.player_direction.rotate(90), (self.game.all_sprites, self.game.bullet_sprites))
+            Bullet(self.game.bullet_surf, pos, self.player_direction.rotate(-90), (self.game.all_sprites, self.game.bullet_sprites))
+            Bullet(self.game.bullet_surf, pos, self.player_direction.rotate(180), (self.game.all_sprites, self.game.bullet_sprites))
             self.can_shoot = False
             self.shoot_time = pygame.time.get_ticks()
 
