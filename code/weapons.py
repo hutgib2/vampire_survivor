@@ -71,6 +71,29 @@ class Gun(pygame.sprite.Sprite):
             #     Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(-90), (self.all_sprites, self.bullet_sprites))
             #     Bullet(self.bullet_surf, pos, self.gun.player_direction.rotate(180), (self.all_sprites, self.bullet_sprites))
 
+class PiercingGun(Gun):
+    def __init__(self, surf, player, groups, game):
+        super().__init__(surf, player, groups, game)
+        self.player = player
+        self.distance = 120
+        self.game = game
+        self.player_direction = pygame.Vector2(1, -1)
+        self.gun_surf = surf
+        self.image = self.gun_surf
+        self.rect = self.image.get_frect(center = self.player.rect.center + self.player_direction * self.distance)
+        self.can_shoot = True
+        self.shoot_time = 0
+        self.cooldown = 250
+
+    def bullet_collision(self):
+        for bullet in self.game.bullet_sprites:
+            collision_sprites = pygame.sprite.spritecollide(bullet, self.game.enemy_sprites, False, pygame.sprite.collide_mask)
+            for enemy in collision_sprites:
+                if enemy.death_time == 0:
+                    self.game.impact_sound.play()
+                    enemy.destroy(False)
+                    self.game.kill_count += 1
+
 class Shotgun(Gun):
     def __init__(self, surf, player, groups, game):
         super().__init__(surf, player, groups, game)
@@ -88,7 +111,7 @@ class Shotgun(Gun):
     def shoot(self):
         if pygame.mouse.get_pressed()[0] and self.can_shoot:
             self.game.shoot_sound.play()
-            pos = self.rect.center + self.player_direction * 50
+            pos = self.rect.center + self.player_direction * 64
             Bullet(self.game.bullet_surf, pos, self.player_direction, (self.game.all_sprites, self.game.bullet_sprites))
             Bullet(self.game.bullet_surf, pos, self.player_direction.rotate(45), (self.game.all_sprites, self.game.bullet_sprites))
             Bullet(self.game.bullet_surf, pos, self.player_direction.rotate(-45), (self.game.all_sprites, self.game.bullet_sprites))

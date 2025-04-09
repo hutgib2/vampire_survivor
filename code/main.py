@@ -5,7 +5,7 @@ from random import randint, choice
 from pytmx.util_pygame import load_pygame
 from groups import AllSprites
 from homescreen import *
-from weapons import Gun, Shotgun, Machinegun, Lasergun, Knife
+from weapons import Gun, PiercingGun, Shotgun, Machinegun, Lasergun, Knife
 
 class Game:
     def __init__(self, display_surface): # Constructor 
@@ -69,17 +69,17 @@ class Game:
     def load_images(self):
         self.life_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'life.png')), (75, 75)).convert_alpha()
         self.pierce_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'pierce.png')), (75, 75)).convert_alpha()
-        self.machinegun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'machinegun.png')), (90, 90)).convert_alpha()
-        self.lasergun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'lasergun.png')), (75, 75)).convert_alpha()
+        self.machinegun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'machinegun.png')), (125, 60)).convert_alpha()
+        self.lasergun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'lasergun.png')), (100, 75)).convert_alpha()
         self.lasergun_surf = pygame.transform.flip(self.lasergun_surf, True, False)
         self.laser_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'laserbeam.png')), (WINDOW_WIDTH, 75)).convert_alpha()
-        self.shotgun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'shotgun.png')), (120, 36)).convert_alpha()
+        self.shotgun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'shotgun.png')), (150, 40)).convert_alpha()
         self.sideshot_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'sideshot.png')), (100, 50)).convert_alpha()
-        self.knife_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'knife.png')), (140, 90)).convert_alpha()
-        self.powerup_surfaces = {'life':self.life_surf, 'machinegun':self.machinegun_surf, 'laser':self.lasergun_surf, 'shotgun':self.shotgun_surf, 'knife':self.knife_surf}
+        self.knife_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'knife.png')), (150, 50)).convert_alpha()
+        self.powerup_surfaces = {'life':self.life_surf, 'pierce':self.pierce_surf, 'machinegun':self.machinegun_surf, 'laser':self.lasergun_surf, 'shotgun':self.shotgun_surf, 'knife':self.knife_surf}
 
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
-        self.gun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'gun.png')), (100, 70)).convert_alpha()
+        self.gun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'gun.png')), (100, 54)).convert_alpha()
         folders = list(walk(join('..', 'images', 'enemies')))[0][1]
         self.enemy_frames = {}
         for folder in folders:
@@ -122,7 +122,9 @@ class Game:
             self.powerup_time = pygame.time.get_ticks()
             self.powerup_activated = True
             self.gun.kill()
-            if powerup.type == 'machinegun':
+            if powerup.type == 'pierce':
+                self.gun = PiercingGun(self.gun_surf, self.player, self.all_sprites, self)
+            elif powerup.type == 'machinegun':
                 self.gun = Machinegun(self.machinegun_surf, self.player, self.all_sprites, self)
             elif powerup.type == 'laser':
                 self.gun = Lasergun(self.lasergun_surf, self.player, self.all_sprites, self)
