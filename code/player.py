@@ -1,10 +1,12 @@
 from settings import *
+from weapons import Gun, PiercingGun, Shotgun, Machinegun, Lasergun, Sideshotgun, Knife
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, groups, collision_sprites):
+    def __init__(self, pos, groups, collision_sprites, gun_surf, game):
         super().__init__(groups)
         self.load_images()
         self.image = pygame.image.load(join('..', 'images', 'player', 'down', '0.png')).convert_alpha()
+        self.gun_surf = gun_surf
         self.rect = self.image.get_frect(center = pos)
         self.direction = pygame.math.Vector2()
         self.speed = 325
@@ -12,15 +14,20 @@ class Player(pygame.sprite.Sprite):
         self.hitbox_rect = self.rect.inflate(-60, -90)
         self.state, self.frame_index = 'right', 0
         self.lives = 3
+        self.game = game
+        self.gun = Gun(self.gun_surf, self, self.game.all_sprites, self.game)
+        self.powerup_activated = False
+        self.powerup_cooldown = 5000
+        self.powerup_time = 0
 
     def move(self, dt):
         self.hitbox_rect.x += self.direction.x * self.speed * dt
-        self.collision('horizontal')
+        self.object_collision('horizontal')
         self.hitbox_rect.y += self.direction.y * self.speed * dt
-        self.collision('vertical')
+        self.object_collision('vertical')
         self.rect.center = self.hitbox_rect.center
 
-    def collision(self, direction):
+    def object_collision(self, direction):
         for sprite in self.collision_sprites:
             if sprite.rect.colliderect(self.hitbox_rect):
                 if direction == 'horizontal':
@@ -59,7 +66,54 @@ class Player(pygame.sprite.Sprite):
         self.frame_index = self.frame_index + 5 * dt if self.direction else 0
         self.image = self.frames[self.state][int(self.frame_index) % len(self.frames[self.state])]
 
+    def enemy_collision(self):
+        collision_sprites = pygame.sprite.spritecollide(self, self.game.enemy_sprites, False, pygame.sprite.collide_mask)
+        for enemy in collision_sprites:
+            if enemy.death_time == 0:
+                enemy.destroy(True)
+                self.game.impact_sound.play()
+                self.lives -= 1
+                if self.lives < 1:
+                    if self.game.kill_count > self.game.high_score:
+                        self.game.save_high_score(self.game.kill_count)
+                    return True
+        return False
+    
+    def powerup_timer(self):
+        if self.powerup_activated:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.powerup_time >= self.powerup_cooldown:
+                self.powerup_activated = False
+                self.gun.kill()
+                self.gun = Gun(self.gun_surf, self, self.all_sprites, self.game)
+
+    def powerup_collision(self):
+        powerup_collisions = pygame.sprite.spritecollide(self, self.game.powerup_sprites, True, pygame.sprite.collide_mask)
+        for powerup in powerup_collisions:
+            self.game.powerup_count -= 1
+            if powerup.type == 'life':
+                if self.lives < 3:
+                    self.lives += 1
+                continue
+            self.powerup_time = pygame.time.get_ticks()
+            self.powerup_activated = True
+            self.gun.kill()
+            if powerup.type == 'pierce':
+                self.gun = PiercingGun(self.gun_surf, self, self.game.all_sprites, self.game)
+            elif powerup.type == 'machinegun':
+                self.gun = Machinegun(self.game.machinegun_surf, self, self.game.all_sprites, self.game)
+            elif powerup.type == 'laser':
+                self.gun = Lasergun(self.game.lasergun_surf, self, self.game.all_sprites, self.game)
+            elif powerup.type == 'shotgun':
+                self.gun = Shotgun(self.game.shotgun_surf, self, self.game.all_sprites, self.game)
+            elif powerup.type == 'sideshot':
+                self.gun = Sideshotgun(self.gun_surf, self, self.game.all_sprites, self.game)
+            elif powerup.type == 'knife':
+                self.gun = Knife(self.game.knife_surf, self, self.game.all_sprites, self.game)
+
     def update(self, dt):
         self.input()
         self.move(dt)
         self.animate(dt)
+        self.powerup_collision()
+        self.powerup_timer()

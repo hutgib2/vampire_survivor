@@ -5,7 +5,7 @@ from random import randint, choice
 from pytmx.util_pygame import load_pygame
 from groups import AllSprites
 from homescreen import *
-from weapons import Gun, PiercingGun, Shotgun, Machinegun, Lasergun, Sideshotgun, Knife
+
 
 class Game:
     def __init__(self, display_surface): # Constructor 
@@ -18,9 +18,6 @@ class Game:
 
         #powerups
         self.powerup_count = 0
-        self.powerup_activated = False
-        self.powerup_cooldown = 5000
-        self.powerup_time = 0
 
         # groups
         self.all_sprites = AllSprites()
@@ -48,9 +45,9 @@ class Game:
         self.music.play(loops = 0)
         
         self.load_images()
-        self.setup()
+        self.load_map()
 
-    def setup(self):
+    def load_map(self):
         map = load_pygame(join('..', 'data', 'maps', 'world.tmx'))
         for x, y, image in map.get_layer_by_name('Ground').tiles():
             Sprite((x * TILE_SIZE, y * TILE_SIZE), image, self.all_sprites)
@@ -60,8 +57,7 @@ class Game:
             CollisionSprite((collision.x, collision.y), pygame.Surface((collision.width, collision.height)), self.collision_sprites)
         for marker in map.get_layer_by_name('Entities'):
             if marker.name == 'Player':
-                self.player = Player((marker.x, marker.y), self.all_sprites, self.collision_sprites)
-                self.gun = Gun(self.gun_surf, self.player, self.all_sprites, self)
+                self.player = Player((marker.x, marker.y), self.all_sprites, self.collision_sprites, self.gun_surf, self)
             elif marker.name == 'Power up':
                 self.powerup_spawn_positions.append((marker.x, marker.y))
             else:
@@ -90,50 +86,6 @@ class Game:
                     surf = pygame.image.load(full_path).convert_alpha()
                     self.enemy_frames[folder].append(surf)
     
-    def player_collision(self):
-        collision_sprites = pygame.sprite.spritecollide(self.player, self.enemy_sprites, False, pygame.sprite.collide_mask)
-        for enemy in collision_sprites:
-            if enemy.death_time == 0:
-                enemy.destroy(True)
-                self.impact_sound.play()
-                self.player.lives -= 1
-                if self.player.lives < 1:
-                    if self.kill_count > self.high_score:
-                        save_high_score(self.kill_count)
-                    return True
-        return False
-    
-    def powerup_timer(self):
-        if self.powerup_activated:
-            current_time = pygame.time.get_ticks()
-            if current_time - self.powerup_time >= self.powerup_cooldown:
-                self.powerup_activated = False
-                self.gun.kill()
-                self.gun = Gun(self.gun_surf, self.player, self.all_sprites, self)
-
-    def powerup_collision(self):
-        powerup_collisions = pygame.sprite.spritecollide(self.player, self.powerup_sprites, True, pygame.sprite.collide_mask)
-        for powerup in powerup_collisions:
-            self.powerup_count -= 1
-            if powerup.type == 'life':
-                if self.player.lives < 3:
-                    self.player.lives += 1
-                continue
-            self.powerup_time = pygame.time.get_ticks()
-            self.powerup_activated = True
-            self.gun.kill()
-            if powerup.type == 'pierce':
-                self.gun = PiercingGun(self.gun_surf, self.player, self.all_sprites, self)
-            elif powerup.type == 'machinegun':
-                self.gun = Machinegun(self.machinegun_surf, self.player, self.all_sprites, self)
-            elif powerup.type == 'laser':
-                self.gun = Lasergun(self.lasergun_surf, self.player, self.all_sprites, self)
-            elif powerup.type == 'shotgun':
-                self.gun = Shotgun(self.shotgun_surf, self.player, self.all_sprites, self)
-            elif powerup.type == 'sideshot':
-                self.gun = Sideshotgun(self.gun_surf, self.player, self.all_sprites, self)
-            elif powerup.type == 'knife':
-                self.gun = Knife(self.knife_surf, self.player, self.all_sprites, self)
 
     def get_spawn_position(self, spawn_positions):
         distance_from_player = 0
@@ -164,7 +116,7 @@ class Game:
 
     def display_lives(self):
         for i in range(self.player.lives):
-            self.life_rect = self.life_surf.get_frect(topleft = (10 + (i*85), 10))
+            self.life_rect = self.life_surf.get_frect(topleft = (10 + (i * 85), 10))
             self.display_surface.blit(self.life_surf, self.life_rect)
         
     def run(self):
@@ -178,10 +130,8 @@ class Game:
                 if event.type == self.powerup_event and self.powerup_count < 5:
                     self.powerup_count += 1
                     Powerup(self.get_powerup_spawn_position(self.powerup_spawn_positions), choice(list(self.powerup_surfaces.items())), (self.all_sprites, self.powerup_sprites), self.player)
-            self.powerup_timer()
             self.all_sprites.update(dt)
-            self.powerup_collision()
-            if self.player_collision():
+            if self.player.enemy_collision():
                 self.music.stop()
                 return True
             self.all_sprites.draw(self.player.rect.center)
