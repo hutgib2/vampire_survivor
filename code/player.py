@@ -1,6 +1,6 @@
 from settings import *
 from weapons import Gun, PiercingGun, Shotgun, Machinegun, Lasergun, Sideshotgun, Knife
-
+from homescreen import save_high_score
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos, groups, collision_sprites, gun_surf, game):
         super().__init__(groups)
@@ -75,7 +75,7 @@ class Player(pygame.sprite.Sprite):
                 self.lives -= 1
                 if self.lives < 1:
                     if self.game.kill_count > self.game.high_score:
-                        self.game.save_high_score(self.game.kill_count)
+                        save_high_score(self.game.kill_count)
                     return True
         return False
     
@@ -97,6 +97,7 @@ class Player(pygame.sprite.Sprite):
                 continue
             self.powerup_time = pygame.time.get_ticks()
             self.powerup_activated = True
+            self.game.powerup_spawn_positions.append(powerup.rect.center)
             self.gun.kill()
             if powerup.type == 'pierce':
                 self.gun = PiercingGun(self.gun_surf, self, self.game.all_sprites, self.game)

@@ -31,7 +31,7 @@ class Game:
         self.enemy_event = pygame.event.custom_type()
         pygame.time.set_timer(self.enemy_event, 300)
         self.powerup_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.powerup_event, 5000)
+        pygame.time.set_timer(self.powerup_event, 15000)
         self.enemy_spawn_positions = []
         self.powerup_spawn_positions = []
 
@@ -96,21 +96,7 @@ class Game:
         while distance_from_player < 700:
             pos = choice(spawn_positions)
             distance_from_player = pygame.math.Vector2.magnitude(pygame.math.Vector2(pos) - pygame.math.Vector2(self.player.rect.center))
-        return pos
-    
-    def get_powerup_spawn_position(self, spawn_positions):
-        distance_from_powerup = 0
-        valid_pos = False
-        while not valid_pos:
-            pos = choice(spawn_positions)
-            valid_pos = True
-            if not self.powerup_sprites:
-                return pos
-            for powerup in self.powerup_sprites:
-                distance_from_powerup = pygame.math.Vector2.magnitude(pygame.math.Vector2(pos) - pygame.math.Vector2(powerup.rect.center))
-                if distance_from_powerup < 100:
-                    valid_pos = False
-        return pos
+        return pos  
     
     def display_score(self):
         self.text_surf = self.font.render(str(self.kill_count), True, 'gray25')
@@ -133,7 +119,7 @@ class Game:
                     Enemy(self.get_spawn_position(self.enemy_spawn_positions), choice(list(self.enemy_frames.items())), self.player, self.collision_sprites, self)
                 if event.type == self.powerup_event and self.powerup_count < 5:
                     self.powerup_count += 1
-                    Powerup(self.get_powerup_spawn_position(self.powerup_spawn_positions), choice(list(self.powerup_surfaces.items())), (self.all_sprites, self.powerup_sprites), self.player)
+                    Powerup(self.powerup_spawn_positions.pop(randint(0, len(self.powerup_spawn_positions) - 1)), choice(list(self.powerup_surfaces.items())), (self.all_sprites, self.powerup_sprites), self.player)
             self.all_sprites.update(dt)
             game_over = self.player.enemy_collision()
             if game_over:
