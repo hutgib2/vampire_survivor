@@ -18,7 +18,7 @@ class Game:
 
         #powerups
         self.powerup_count = 0
-
+        self.laser_cache = {}
         # groups
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
@@ -31,7 +31,7 @@ class Game:
         self.enemy_event = pygame.event.custom_type()
         pygame.time.set_timer(self.enemy_event, 300)
         self.powerup_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.powerup_event, 15000)
+        pygame.time.set_timer(self.powerup_event, 5000)
         self.enemy_spawn_positions = []
         self.powerup_spawn_positions = []
 
@@ -43,9 +43,6 @@ class Game:
         self.music = pygame.mixer.Sound(join('..', 'audio', 'my_first_mashup.wav'))
         self.music.set_volume(0.55)
         self.music.play(loops = 0)
-        
-        self.load_images()
-        self.load_map()
 
     def load_map(self):
         map = load_pygame(join('..', 'data', 'maps', 'world.tmx'))
@@ -74,7 +71,6 @@ class Game:
         self.gun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'gun.png')), (100, 54)).convert_alpha()
         self.knife_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'knife.png')), (150, 50)).convert_alpha()
         self.powerup_surfaces = {'life':self.life_surf, 'pierce':self.pierce_surf, 'machinegun':self.machinegun_surf, 'laser':self.lasergun_surf, 'shotgun':self.shotgun_surf, 'sideshot':self.gun_surf, 'knife':self.knife_surf}
-
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
         folders = list(walk(join('..', 'images', 'enemies')))[0][1]
         self.enemy_frames = {}
@@ -86,6 +82,14 @@ class Game:
                     surf = pygame.image.load(full_path).convert_alpha()
                     self.enemy_frames[folder].append(surf)
     
+    def load_laser_cache(self):
+        for i in range(0, 360):
+            self.laser_cache[i] = pygame.transform.rotate(self.laser_surf, i)
+            
+    def load_data(self):
+        self.load_images()
+        self.load_map()
+        self.load_laser_cache()
 
     def get_spawn_position(self, spawn_positions):
         distance_from_player = 0
@@ -126,12 +130,13 @@ class Game:
                 if event.type == pygame.QUIT:
                     return False
                 if event.type == self.enemy_event:
-                    Enemy(self.get_spawn_position(self.enemy_spawn_positions), choice(list(self.enemy_frames.items())), (self.all_sprites, self.enemy_sprites), self.player, self.collision_sprites)
+                    Enemy(self.get_spawn_position(self.enemy_spawn_positions), choice(list(self.enemy_frames.items())), self.player, self.collision_sprites, self)
                 if event.type == self.powerup_event and self.powerup_count < 5:
                     self.powerup_count += 1
                     Powerup(self.get_powerup_spawn_position(self.powerup_spawn_positions), choice(list(self.powerup_surfaces.items())), (self.all_sprites, self.powerup_sprites), self.player)
             self.all_sprites.update(dt)
-            if self.player.enemy_collision():
+            game_over = self.player.enemy_collision()
+            if game_over:
                 self.music.stop()
                 return True
             self.all_sprites.draw(self.player.rect.center)
@@ -149,6 +154,7 @@ if __name__ == '__main__':
     is_running = homescreen.wait()
     while is_running:
         game = Game(display_surface)
+        game.load_data()
         is_running = game.run()
         if is_running:
             homescreen = HomeScreen(display_surface, game_over_screen)

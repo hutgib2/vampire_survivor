@@ -31,8 +31,9 @@ class Powerup(pygame.sprite.Sprite):
         self.rect.centery += self.position_offset[int(self.frame_index) % len(self.position_offset)]        
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, pos, framedata, groups, player, collision_sprites):
-        super().__init__(groups)
+    def __init__(self, pos, framedata, player, collision_sprites, game):
+        super().__init__(game.all_sprites, game.enemy_sprites)
+        self.game = game
         self.player = player
         self.enemy_type = framedata[0]
         self.frames = framedata[1]
@@ -86,6 +87,7 @@ class Enemy(pygame.sprite.Sprite):
                     self.image.set_at((x, y), (175, 0, 0))
 
     def destroy(self, hit_player):
+        self.game.enemy_sprites.remove(self)
         self.death_time = pygame.time.get_ticks()
         self.image = pygame.mask.from_surface(self.frames[0]).to_surface()
         self.image.set_colorkey('black')

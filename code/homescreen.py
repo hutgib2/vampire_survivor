@@ -1,6 +1,5 @@
 from settings import *
 
-
 def load_high_score():
     with open(join('..', 'data', 'high_score.txt'), 'r') as file:
         content = file.read()

@@ -85,7 +85,7 @@ class Player(pygame.sprite.Sprite):
             if current_time - self.powerup_time >= self.powerup_cooldown:
                 self.powerup_activated = False
                 self.gun.kill()
-                self.gun = Gun(self.gun_surf, self, self.all_sprites, self.game)
+                self.gun = Gun(self.gun_surf, self, self.game.all_sprites, self.game)
 
     def powerup_collision(self):
         powerup_collisions = pygame.sprite.spritecollide(self, self.game.powerup_sprites, True, pygame.sprite.collide_mask)
