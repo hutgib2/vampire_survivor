@@ -1,6 +1,10 @@
 from settings import *
 from weapons import Gun, PiercingGun, Shotgun, Machinegun, Lasergun, Sideshotgun, Knife
 from homescreen import save_high_score
+
+PLAYER_SPEED = 325
+ANIMATION_SPEED = 6
+
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos, groups, collision_sprites, gun_surf, game):
         super().__init__(groups)
@@ -9,16 +13,17 @@ class Player(pygame.sprite.Sprite):
         self.gun_surf = gun_surf
         self.rect = self.image.get_frect(center = pos)
         self.direction = pygame.math.Vector2()
-        self.speed = 325
+        self.speed = PLAYER_SPEED
+        self.animation_speed = ANIMATION_SPEED
         self.collision_sprites = collision_sprites
         self.hitbox_rect = self.rect.inflate(-60, -90)
         self.state, self.frame_index = 'right', 0
         self.lives = 3
         self.game = game
         self.gun = Gun(self.gun_surf, self, self.game.all_sprites, self.game)
-        self.powerup_activated = False
+        self.powerup_activated = 'none'
         self.powerup_cooldown = 5000
-        self.powerup_time = 0
+        self.powerup_activation_time = 0
 
     def move(self, dt):
         self.hitbox_rect.x += self.direction.x * self.speed * dt
@@ -63,7 +68,7 @@ class Player(pygame.sprite.Sprite):
             self.state = 'right' if self.direction.x > 0 else 'left'
         if self.direction.y != 0:
             self.state = 'down' if self.direction.y > 0 else 'up'
-        self.frame_index = self.frame_index + 5 * dt if self.direction else 0
+        self.frame_index = self.frame_index + self.animation_speed * dt if self.direction else 0
         self.image = self.frames[self.state][int(self.frame_index) % len(self.frames[self.state])]
 
     def enemy_collision(self):
@@ -80,23 +85,31 @@ class Player(pygame.sprite.Sprite):
         return False
     
     def powerup_timer(self):
-        if self.powerup_activated:
+        if self.powerup_activated != 'none':
             current_time = pygame.time.get_ticks()
-            if current_time - self.powerup_time >= self.powerup_cooldown:
-                self.powerup_activated = False
-                self.gun.kill()
-                self.gun = Gun(self.gun_surf, self, self.game.all_sprites, self.game)
+            if current_time - self.powerup_activation_time >= self.powerup_cooldown:
+                if self.powerup_activated == 'superspeed':
+                    self.speed = PLAYER_SPEED
+                    self.animation_speed = ANIMATION_SPEED
+                else:
+                    self.gun.kill()
+                    self.gun = Gun(self.gun_surf, self, self.game.all_sprites, self.game)
+                self.powerup_activated = 'none'
 
     def powerup_collision(self):
         powerup_collisions = pygame.sprite.spritecollide(self, self.game.powerup_sprites, True, pygame.sprite.collide_mask)
         for powerup in powerup_collisions:
+            self.game.powerup_spawn_positions.append(powerup.rect.center)
             if powerup.type == 'life':
                 if self.lives < 3:
                     self.lives += 1
                 continue
-            self.powerup_time = pygame.time.get_ticks()
-            self.powerup_activated = True
-            self.game.powerup_spawn_positions.append(powerup.rect.center)
+            self.powerup_activation_time = pygame.time.get_ticks()
+            self.powerup_activated = powerup.type
+            if powerup.type == 'superspeed':
+                self.speed = PLAYER_SPEED * 2
+                self.animation_speed = ANIMATION_SPEED * 2
+                continue
             self.gun.kill()
             if powerup.type == 'pierce':
                 self.gun = PiercingGun(self.gun_surf, self, self.game.all_sprites, self.game)

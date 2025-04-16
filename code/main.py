@@ -27,7 +27,7 @@ class Game:
         self.enemy_event = pygame.event.custom_type()
         pygame.time.set_timer(self.enemy_event, 300)
         self.powerup_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.powerup_event, 5000)
+        pygame.time.set_timer(self.powerup_event, 15000)
         self.enemy_spawn_positions = []
         self.powerup_spawn_positions = []
 
@@ -66,8 +66,19 @@ class Game:
         self.shotgun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'shotgun.png')), (150, 40)).convert_alpha()
         self.gun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'gun.png')), (100, 54)).convert_alpha()
         self.knife_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'knife.png')), (150, 50)).convert_alpha()
-        self.powerup_surfaces = {'life':self.life_surf, 'pierce':self.pierce_surf, 'machinegun':self.machinegun_surf, 'laser':self.lasergun_surf, 'shotgun':self.shotgun_surf, 'sideshot':self.gun_surf, 'knife':self.knife_surf}
+        self.superspeed_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'superspeed.png')), (81, 81)).convert_alpha()
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
+        
+        self.powerup_surfaces = {
+                                'life':self.life_surf, 
+                                'pierce':self.pierce_surf, 
+                                'machinegun':self.machinegun_surf, 
+                                'laser':self.lasergun_surf, 
+                                'shotgun':self.shotgun_surf, 
+                                'sideshot':self.gun_surf, 
+                                'knife':self.knife_surf, 
+                                'superspeed':self.superspeed_surf
+                                 }
         folders = list(walk(join('..', 'images', 'enemies')))[0][1]
         self.enemy_frames = {}
         for folder in folders:
