@@ -10,9 +10,17 @@ class AllSprites(pygame.sprite.Group):
         self.offset.x = -(target_pos[0] - WINDOW_WIDTH / 2)
         self.offset.y = -(target_pos[1] - WINDOW_HEIGHT / 2)
         
-        ground_sprites = [sprite for sprite in self if hasattr(sprite, 'ground')]
-        object_sprites = [sprite for sprite in self if not hasattr(sprite, 'ground')]
+        visible_sprites = []
+        for sprite in self.sprites():
+            if hasattr(sprite, 'rect'):
+                if (abs(sprite.rect.centerx - target_pos[0]) < (WINDOW_WIDTH / 2) + 100 and
+                    abs(sprite.rect.centery - target_pos[1]) < (WINDOW_HEIGHT / 2) + 100):
+                    visible_sprites.append(sprite)
 
-        for layer in [ground_sprites, object_sprites]:
-            for sprite in sorted(layer, key = lambda sprite: sprite.rect.centery):
-                self.display_surface.blit(sprite.image, sprite.rect.topleft + self.offset)
+        ground_sprites = [sprite for sprite in visible_sprites if hasattr(sprite, 'ground')]
+        for sprite in ground_sprites:
+            self.display_surface.blit(sprite.image, sprite.rect.topleft + self.offset)
+
+        object_sprites = [sprite for sprite in visible_sprites if not hasattr(sprite, 'ground')]
+        for sprite in sorted(object_sprites, key = lambda sprite: sprite.rect.centery):
+            self.display_surface.blit(sprite.image, sprite.rect.topleft + self.offset)
