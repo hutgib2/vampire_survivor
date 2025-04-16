@@ -164,13 +164,10 @@ class Bullet(pygame.sprite.Sprite):
             self.kill()
 
 class Laser(pygame.sprite.Sprite):
-    def __init__(self, pos, orientation, groups, game):
+    def __init__(self, surf, pos, orientation, groups):
         super().__init__(groups)
-        self.angle = int(orientation.angle_to(pygame.math.Vector2(0, 1)))
-        if self.angle < 0:
-            self.angle += 360
-        self.game = game
-        self.image = self.game.laser_cache[self.angle]
+        self.angle = orientation.angle_to(pygame.math.Vector2(0, 1))
+        self.image = pygame.transform.rotate(surf, self.angle)
         self.rect = self.image.get_frect(center = pos)
         self.spawn_time = pygame.time.get_ticks()
         self.lifetime = 50
@@ -195,21 +192,14 @@ class Lasergun(Gun):
         self.cooldown = 250
 
     def bullet_collision(self):
-        collision_sprites = pygame.sprite.groupcollide(self.game.bullet_sprites, self.game.enemy_sprites, True, False, pygame.sprite.collide_mask)
+        collision_sprites = pygame.sprite.groupcollide(self.game.bullet_sprites, self.game.enemy_sprites, False, False, pygame.sprite.collide_mask)
         for bullet, enemies in collision_sprites.items():
             for enemy in enemies:
                 self.game.impact_sound.play()
                 enemy.destroy(False)
-                Laser(enemy.rect.center, bullet.direction, (self.game.all_sprites, self.game.laser_sprites), self.game)
-                self.game.kill_count += 1
-                break
-
-    def laser_collision(self):
-        collision_sprites = pygame.sprite.groupcollide(self.game.laser_sprites, self.game.enemy_sprites, False, False, pygame.sprite.collide_mask)
-        for laser, enemies in collision_sprites.items():
-            for enemy in enemies:
-                self.game.impact_sound.play()
-                enemy.destroy(False)
+                if type(bullet) == Bullet:
+                    bullet.kill()
+                    Laser(self.game.laser_surf, enemy.rect.center, bullet.direction, (self.game.all_sprites, self.game.bullet_sprites))
                 self.game.kill_count += 1
                 break
 
@@ -220,7 +210,6 @@ class Lasergun(Gun):
         self.shoot_timer()
         self.shoot()
         self.bullet_collision()
-        self.laser_collision()
 
 class Knife(Gun):
     def __init__(self, surf, player, groups, game):

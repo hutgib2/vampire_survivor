@@ -15,10 +15,6 @@ class Game:
         self.font = pygame.font.Font(join('..', 'images', 'Oxanium-Bold.ttf'), 40)
         self.kill_count = 0
         self.high_score = load_high_score()
-
-        #powerups
-        self.powerup_count = 0
-        self.laser_cache = {}
         # groups
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
@@ -31,7 +27,7 @@ class Game:
         self.enemy_event = pygame.event.custom_type()
         pygame.time.set_timer(self.enemy_event, 300)
         self.powerup_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.powerup_event, 15000)
+        pygame.time.set_timer(self.powerup_event, 5000)
         self.enemy_spawn_positions = []
         self.powerup_spawn_positions = []
 
@@ -81,15 +77,10 @@ class Game:
                     full_path = join(folder_path, file_name)
                     surf = pygame.image.load(full_path).convert_alpha()
                     self.enemy_frames[folder].append(surf)
-    
-    def load_laser_cache(self):
-        for i in range(0, 360):
-            self.laser_cache[i] = pygame.transform.rotate(self.laser_surf, i)
             
     def load_data(self):
         self.load_images()
         self.load_map()
-        self.load_laser_cache()
 
     def get_spawn_position(self, spawn_positions):
         distance_from_player = 0
@@ -117,8 +108,7 @@ class Game:
                     return False
                 if event.type == self.enemy_event:
                     Enemy(self.get_spawn_position(self.enemy_spawn_positions), choice(list(self.enemy_frames.items())), self.player, self.collision_sprites, self)
-                if event.type == self.powerup_event and self.powerup_count < 5:
-                    self.powerup_count += 1
+                if event.type == self.powerup_event and len(self.powerup_spawn_positions) - 1 > 0:
                     Powerup(self.powerup_spawn_positions.pop(randint(0, len(self.powerup_spawn_positions) - 1)), choice(list(self.powerup_surfaces.items())), (self.all_sprites, self.powerup_sprites), self.player)
             self.all_sprites.update(dt)
             game_over = self.player.enemy_collision()

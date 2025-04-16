@@ -90,7 +90,6 @@ class Player(pygame.sprite.Sprite):
     def powerup_collision(self):
         powerup_collisions = pygame.sprite.spritecollide(self, self.game.powerup_sprites, True, pygame.sprite.collide_mask)
         for powerup in powerup_collisions:
-            self.game.powerup_count -= 1
             if powerup.type == 'life':
                 if self.lives < 3:
                     self.lives += 1
