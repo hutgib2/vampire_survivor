@@ -2,7 +2,7 @@ from settings import *
 from weapons import Gun, PiercingGun, Shotgun, Machinegun, Lasergun, Sideshotgun, Knife
 from homescreen import save_high_score
 
-PLAYER_SPEED = 325
+PLAYER_SPEED = 350
 ANIMATION_SPEED = 6
 
 class Player(pygame.sprite.Sprite):
@@ -70,11 +70,15 @@ class Player(pygame.sprite.Sprite):
             self.state = 'down' if self.direction.y > 0 else 'up'
         self.frame_index = self.frame_index + self.animation_speed * dt if self.direction else 0
         self.image = self.frames[self.state][int(self.frame_index) % len(self.frames[self.state])]
+        if self.powerup_activated == 'shield':
+            self.image.set_alpha(130)
+        else:
+            self.image.set_alpha(255)
 
     def enemy_collision(self):
         collision_sprites = pygame.sprite.spritecollide(self, self.game.enemy_sprites, False, pygame.sprite.collide_mask)
         for enemy in collision_sprites:
-            if enemy.death_time == 0:
+            if self.powerup_activated != 'shield':
                 enemy.destroy(True)
                 self.game.impact_sound.play()
                 self.lives -= 1
@@ -92,6 +96,7 @@ class Player(pygame.sprite.Sprite):
                     self.speed = PLAYER_SPEED
                     self.animation_speed = ANIMATION_SPEED
                 else:
+                    surfs = self.frames['left']
                     self.gun.kill()
                     self.gun = Gun(self.gun_surf, self, self.game.all_sprites, self.game)
                 self.powerup_activated = 'none'
@@ -110,6 +115,8 @@ class Player(pygame.sprite.Sprite):
                 self.speed = PLAYER_SPEED * 2
                 self.animation_speed = ANIMATION_SPEED * 2
                 continue
+            if self.powerup_activated == 'shield':
+                return
             self.gun.kill()
             if powerup.type == 'pierce':
                 self.gun = PiercingGun(self.gun_surf, self, self.game.all_sprites, self.game)

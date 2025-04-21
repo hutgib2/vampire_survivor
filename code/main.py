@@ -27,7 +27,7 @@ class Game:
         self.enemy_event = pygame.event.custom_type()
         pygame.time.set_timer(self.enemy_event, 300)
         self.powerup_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.powerup_event, 15000)
+        pygame.time.set_timer(self.powerup_event, 5000)
         self.enemy_spawn_positions = []
         self.powerup_spawn_positions = []
 
@@ -67,6 +67,7 @@ class Game:
         self.gun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'gun.png')), (100, 54)).convert_alpha()
         self.knife_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'knife.png')), (150, 50)).convert_alpha()
         self.superspeed_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'superspeed.png')), (81, 81)).convert_alpha()
+        self.shield_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'shield.png')), (81, 81)).convert_alpha()
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
         
         self.powerup_surfaces = {
@@ -77,8 +78,9 @@ class Game:
                                 'shotgun':self.shotgun_surf, 
                                 'sideshot':self.gun_surf, 
                                 'knife':self.knife_surf, 
-                                'superspeed':self.superspeed_surf
-                                 }
+                                'superspeed':self.superspeed_surf,
+                                'shield':self.shield_surf
+                                }
         folders = list(walk(join('..', 'images', 'enemies')))[0][1]
         self.enemy_frames = {}
         for folder in folders:
