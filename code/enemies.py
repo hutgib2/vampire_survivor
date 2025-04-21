@@ -1,5 +1,5 @@
 from settings import *
-
+from projectiles import Orb
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, pos, framedata, player, collision_sprites, game):
         super().__init__(game.all_sprites, game.enemy_sprites)
@@ -86,7 +86,9 @@ class Boss(pygame.sprite.Sprite):
         self.animation_speed = 6
         self.position_offset = [0, 1, 0, -1]
         self.frame_index = 0
-
+        self.can_shoot = True
+        self.shoot_time = 0
+        self.orb_cooldown = 1000
         self.rect = self.image.get_frect(center = pos)
         self.direction = pygame.Vector2()
         self.speed = 150
@@ -110,6 +112,19 @@ class Boss(pygame.sprite.Sprite):
                if color == (255, 255, 255):
                     self.image.set_at((x, y), (175, 0, 0))
 
+    def shoot(self):
+        if pygame.mouse.get_pressed()[0] and self.can_shoot:
+            self.game.shoot_sound.play()
+            Orb(self.game.orb_surf, self.rect.center, (pygame.math.Vector2(self.player.rect.center) - (pygame.math.Vector2(self.rect.center))).normalize(), (self.game.all_sprites, self.game.enemy_sprites))
+            self.can_shoot = False
+            self.shoot_time = pygame.time.get_ticks()
+    
+    def shoot_timer(self):
+        if not self.can_shoot:
+            current_time = pygame.time.get_ticks()
+            if current_time - self.shoot_time >= self.orb_cooldown:
+                self.can_shoot = True
+
     def destroy(self, hit_player):
         self.game.enemy_sprites.remove(self)
         self.death_time = pygame.time.get_ticks()
@@ -124,6 +139,8 @@ class Boss(pygame.sprite.Sprite):
 
     def update(self, dt):
         if self.death_time == 0:
+            self.shoot()
+            self.shoot_timer()
             self.move(dt)
             self.animate(dt)
         else:

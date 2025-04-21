@@ -1,5 +1,6 @@
 from settings import *
 from math import atan2, degrees
+from projectiles import Bullet, Laser
 
 class Gun(pygame.sprite.Sprite):
     def __init__(self, surf, player, groups, game):
@@ -49,16 +50,17 @@ class Gun(pygame.sprite.Sprite):
         collision_sprites = pygame.sprite.groupcollide(self.game.bullet_sprites, self.game.enemy_sprites, True, False, pygame.sprite.collide_mask)
         for bullet, enemies in collision_sprites.items():
             for enemy in enemies:
-                self.game.impact_sound.play()
-                if enemy.type != 'boss':
-                    enemy.destroy(False)
-                    self.game.kill_count += 1
-                    break
-                else:
-                    enemy.lives -= 1
-                    if enemy.lives <= 0:
+                if enemy.type != 'orb':
+                    self.game.impact_sound.play()
+                    if enemy.type != 'boss':
                         enemy.destroy(False)
                         self.game.kill_count += 1
+                        break
+                    else:
+                        enemy.lives -= 1
+                        if enemy.lives <= 0:
+                            enemy.destroy(False)
+                            self.game.kill_count += 1
 
     def update(self, _):
         self.get_direction()
@@ -105,35 +107,6 @@ class Machinegun(Gun):
     def __init__(self, surf, player, groups, game):
         super().__init__(surf, player, groups, game)
         self.cooldown = 125
-
-class Bullet(pygame.sprite.Sprite):
-    def __init__(self, surf, pos, direction, groups):
-        super().__init__(groups)
-        self.image = surf
-        self.rect = self.image.get_frect(center = pos) 
-        self.spawn_time = pygame.time.get_ticks()
-        self.lifetime = 1000
-        self.direction = direction
-        self.speed = 1200
-    
-    def update(self, dt):
-        self.rect.center += self.direction * self.speed * dt
-        if pygame.time.get_ticks() - self.spawn_time >= self.lifetime:
-            self.kill()
-
-class Laser(pygame.sprite.Sprite):
-    def __init__(self, surf, pos, orientation, groups):
-        super().__init__(groups)
-        self.angle = orientation.angle_to(pygame.math.Vector2(0, 1))
-        self.image = pygame.transform.rotate(surf, self.angle)
-        self.rect = self.image.get_frect(center = pos)
-        self.spawn_time = pygame.time.get_ticks()
-        self.lifetime = 50
-        self.direction = pygame.math.Vector2(0,0)
-    
-    def update(self, dt):
-        if pygame.time.get_ticks() - self.spawn_time >= self.lifetime:
-            self.kill()
 
 class Lasergun(Gun):
     def bullet_collision(self):

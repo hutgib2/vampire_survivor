@@ -79,7 +79,10 @@ class Player(pygame.sprite.Sprite):
         collision_sprites = pygame.sprite.spritecollide(self, self.game.enemy_sprites, False, pygame.sprite.collide_mask)
         for enemy in collision_sprites:
             if self.powerup_activated != 'shield':
-                enemy.destroy(True)
+                if enemy.type != 'orb':
+                    enemy.destroy(True)
+                else:
+                    enemy.kill()
                 self.game.impact_sound.play()
                 self.lives -= 1
                 if self.lives < 1:

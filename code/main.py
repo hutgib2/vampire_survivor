@@ -22,14 +22,14 @@ class Game:
         self.enemy_sprites = pygame.sprite.Group()
         self.powerup_sprites = pygame.sprite.Group()
         self.laser_sprites = pygame.sprite.Group()
-
+        self.orb_sprites = pygame.sprite.Group()
         #events
         self.enemy_event = pygame.event.custom_type()
         pygame.time.set_timer(self.enemy_event, 300)
         self.powerup_event = pygame.event.custom_type()
         pygame.time.set_timer(self.powerup_event, 15000)
         self.boss_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.boss_event, 30000)
+        pygame.time.set_timer(self.boss_event, 10000)
         self.enemy_spawn_positions = []
         self.powerup_spawn_positions = []
         #audio
@@ -71,6 +71,8 @@ class Game:
         self.shield_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'shield.png')), (81, 81)).convert_alpha()
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
         self.boss_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'enemies', 'vampire.png')), (144, 288)).convert_alpha()
+        self.orb_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'enemies', 'orb.png')), (52, 52)).convert_alpha()
+        
         self.powerup_surfaces = {
                                 'life':self.life_surf, 
                                 'pierce':self.pierce_surf, 
@@ -82,6 +84,7 @@ class Game:
                                 'superspeed':self.superspeed_surf,
                                 'shield':self.shield_surf
                                 }
+        
         folders = list(walk(join('..', 'images', 'enemies')))[0][1]
         self.enemy_frames = {}
         for folder in folders:
