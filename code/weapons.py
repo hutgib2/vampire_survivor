@@ -50,9 +50,15 @@ class Gun(pygame.sprite.Sprite):
         for bullet, enemies in collision_sprites.items():
             for enemy in enemies:
                 self.game.impact_sound.play()
-                enemy.destroy(False)
-                self.game.kill_count += 1
-                break
+                if enemy.type != 'boss':
+                    enemy.destroy(False)
+                    self.game.kill_count += 1
+                    break
+                else:
+                    enemy.lives -= 1
+                    if enemy.lives <= 0:
+                        enemy.destroy(False)
+                        self.game.kill_count += 1
 
     def update(self, _):
         self.get_direction()

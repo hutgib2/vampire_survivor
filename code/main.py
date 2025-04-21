@@ -5,7 +5,7 @@ from random import randint, choice
 from pytmx.util_pygame import load_pygame
 from groups import AllSprites
 from homescreen import *
-
+from enemies import Enemy, Boss
 
 class Game:
     def __init__(self, display_surface): # Constructor 
@@ -28,9 +28,10 @@ class Game:
         pygame.time.set_timer(self.enemy_event, 300)
         self.powerup_event = pygame.event.custom_type()
         pygame.time.set_timer(self.powerup_event, 15000)
+        self.boss_event = pygame.event.custom_type()
+        pygame.time.set_timer(self.boss_event, 30000)
         self.enemy_spawn_positions = []
         self.powerup_spawn_positions = []
-
         #audio
         self.shoot_sound = pygame.mixer.Sound(join('..', 'audio', 'shoot.wav'))
         self.shoot_sound.set_volume(0.2)
@@ -69,7 +70,7 @@ class Game:
         self.superspeed_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'superspeed.png')), (81, 81)).convert_alpha()
         self.shield_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'shield.png')), (81, 81)).convert_alpha()
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
-        
+        self.boss_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'enemies', 'vampire.png')), (144, 288)).convert_alpha()
         self.powerup_surfaces = {
                                 'life':self.life_surf, 
                                 'pierce':self.pierce_surf, 
@@ -121,6 +122,8 @@ class Game:
                     return False
                 if event.type == self.enemy_event:
                     Enemy(self.get_spawn_position(self.enemy_spawn_positions), choice(list(self.enemy_frames.items())), self.player, self.collision_sprites, self)
+                if event.type == self.boss_event:
+                    Boss(self.get_spawn_position(self.enemy_spawn_positions), self.boss_surf, self.player, self)
                 if event.type == self.powerup_event and len(self.powerup_spawn_positions) - 1 > 0:
                     Powerup(self.powerup_spawn_positions.pop(randint(0, len(self.powerup_spawn_positions) - 1)), choice(list(self.powerup_surfaces.items())), (self.all_sprites, self.powerup_sprites), self.player)
             self.all_sprites.update(dt)
