@@ -27,7 +27,7 @@ class Game:
         self.enemy_event = pygame.event.custom_type()
         pygame.time.set_timer(self.enemy_event, 300)
         self.powerup_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.powerup_event, 5000)
+        pygame.time.set_timer(self.powerup_event, 15000)
         self.enemy_spawn_positions = []
         self.powerup_spawn_positions = []
 

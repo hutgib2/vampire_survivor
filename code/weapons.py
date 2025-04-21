@@ -63,19 +63,6 @@ class Gun(pygame.sprite.Sprite):
         self.bullet_collision()
 
 class PiercingGun(Gun):
-    def __init__(self, surf, player, groups, game):
-        super().__init__(surf, player, groups, game)
-        self.player = player
-        self.distance = 120
-        self.game = game
-        self.player_direction = pygame.Vector2(1, -1)
-        self.gun_surf = surf
-        self.image = self.gun_surf
-        self.rect = self.image.get_frect(center = self.player.rect.center + self.player_direction * self.distance)
-        self.can_shoot = True
-        self.shoot_time = 0
-        self.cooldown = 250
-
     def bullet_collision(self):
         collision_sprites = pygame.sprite.groupcollide(self.game.bullet_sprites, self.game.enemy_sprites, False, False, pygame.sprite.collide_mask)
         for bullet, enemies in collision_sprites.items():
@@ -85,20 +72,7 @@ class PiercingGun(Gun):
                 self.game.kill_count += 1
                 break
 
-class Shotgun(Gun):
-    def __init__(self, surf, player, groups, game):
-        super().__init__(surf, player, groups, game)
-        self.player = player
-        self.distance = 120
-        self.game = game
-        self.player_direction = pygame.Vector2(1, -1)
-        self.shotgun_surf = surf
-        self.image = self.shotgun_surf
-        self.rect = self.image.get_frect(center = self.player.rect.center + self.player_direction * self.distance)
-        self.can_shoot = True
-        self.shoot_time = 0
-        self.cooldown = 250
-        
+class Shotgun(Gun):        
     def shoot(self):
         if pygame.mouse.get_pressed()[0] and self.can_shoot:
             self.game.shoot_sound.play()
@@ -110,19 +84,6 @@ class Shotgun(Gun):
             self.shoot_time = pygame.time.get_ticks()
 
 class Sideshotgun(Gun):
-    def __init__(self, surf, player, groups, game):
-        super().__init__(surf, player, groups, game)
-        self.player = player
-        self.distance = 120
-        self.game = game
-        self.player_direction = pygame.Vector2(1, -1)
-        self.shotgun_surf = surf
-        self.image = self.shotgun_surf
-        self.rect = self.image.get_frect(center = self.player.rect.center + self.player_direction * self.distance)
-        self.can_shoot = True
-        self.shoot_time = 0
-        self.cooldown = 250
-
     def shoot(self):
         if pygame.mouse.get_pressed()[0] and self.can_shoot:
             self.game.shoot_sound.play()
@@ -137,15 +98,6 @@ class Sideshotgun(Gun):
 class Machinegun(Gun):
     def __init__(self, surf, player, groups, game):
         super().__init__(surf, player, groups, game)
-        self.player = player
-        self.distance = 120
-        self.game = game
-        self.player_direction = pygame.Vector2(1, -1)
-        self.shotgun_surf = surf
-        self.image = self.shotgun_surf
-        self.rect = self.image.get_frect(center = self.player.rect.center + self.player_direction * self.distance)
-        self.can_shoot = True
-        self.shoot_time = 0
         self.cooldown = 125
 
 class Bullet(pygame.sprite.Sprite):
@@ -178,19 +130,6 @@ class Laser(pygame.sprite.Sprite):
             self.kill()
 
 class Lasergun(Gun):
-    def __init__(self, surf, player, groups, game):
-        super().__init__(surf, player, groups, game)
-        self.player = player
-        self.distance = 120
-        self.game = game
-        self.player_direction = pygame.Vector2(1, -1)
-        self.shotgun_surf = surf
-        self.image = self.shotgun_surf
-        self.rect = self.image.get_frect(center = self.player.rect.center + self.player_direction * self.distance)
-        self.can_shoot = True
-        self.shoot_time = 0
-        self.cooldown = 250
-
     def bullet_collision(self):
         collision_sprites = pygame.sprite.groupcollide(self.game.bullet_sprites, self.game.enemy_sprites, False, False, pygame.sprite.collide_mask)
         for bullet, enemies in collision_sprites.items():
@@ -203,24 +142,10 @@ class Lasergun(Gun):
                 self.game.kill_count += 1
                 break
 
-    def update(self, _):
-        self.get_direction()
-        self.rotate()
-        self.rect.center = self.player.rect.center + (self.player_direction + pygame.Vector2(0, -0.2)) * self.distance
-        self.shoot_timer()
-        self.shoot()
-        self.bullet_collision()
-
 class Knife(Gun):
     def __init__(self, surf, player, groups, game):
         super().__init__(surf, player, groups, game)
-        self.player = player
-        self.distance = 100
-        self.game = game
-        self.player_direction = pygame.Vector2(1, -1)
-        self.shotgun_surf = surf
-        self.image = self.shotgun_surf
-        self.rect = self.image.get_frect(center = self.player.rect.center + self.player_direction * self.distance)
+        self.distance = 150
 
     def knife_collision(self):
         collision_sprites = pygame.sprite.spritecollide(self, self.game.enemy_sprites, False, pygame.sprite.collide_mask)
