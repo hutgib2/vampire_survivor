@@ -1,6 +1,7 @@
 from settings import *
 from math import atan2, degrees
-from projectiles import Bullet, Laser
+from projectiles import Bullet, Laser, Orb
+from enemies import Enemy, Boss
 
 class Gun(pygame.sprite.Sprite):
     def __init__(self, surf, player, groups, game):
@@ -50,17 +51,17 @@ class Gun(pygame.sprite.Sprite):
         collision_sprites = pygame.sprite.groupcollide(self.game.bullet_sprites, self.game.enemy_sprites, True, False, pygame.sprite.collide_mask)
         for bullet, enemies in collision_sprites.items():
             for enemy in enemies:
-                if enemy.type != 'orb':
-                    self.game.impact_sound.play()
-                    if enemy.type != 'boss':
-                        enemy.destroy(False)
-                        self.game.kill_count += 1
-                        break
-                    else:
-                        enemy.lives -= 1
-                        if enemy.lives <= 0:
-                            enemy.destroy(False)
-                            self.game.kill_count += 1
+                if type(enemy) == Orb:
+                    continue
+                self.game.impact_sound.play()
+                if type(enemy) == Boss:
+                    enemy.lives -= 1
+                    if enemy.lives > 0:
+                        continue 
+                enemy.destroy(False)
+                self.game.kill_count += 1
+
+
 
     def update(self, _):
         self.get_direction()
@@ -113,14 +114,19 @@ class Lasergun(Gun):
         collision_sprites = pygame.sprite.groupcollide(self.game.bullet_sprites, self.game.enemy_sprites, False, False, pygame.sprite.collide_mask)
         for bullet, enemies in collision_sprites.items():
             for enemy in enemies:
+                if type(enemy) == Orb:
+                    continue
                 self.game.impact_sound.play()
-                if type(enemy) == Enemy:
-                    enemy.destroy(False)
+                if enemy.type == Boss:
+                    enemy.lives -= 1
+                    if enemy.lives > 0:
+                        continue
                 if type(bullet) == Bullet:
                     bullet.kill()
                     Laser(self.game.laser_surf, enemy.rect.center, bullet.direction, (self.game.all_sprites, self.game.bullet_sprites))
+                enemy.destroy(False)
                 self.game.kill_count += 1
-                break
+
 
 class Knife(Gun):
     def __init__(self, surf, player, groups, game):
@@ -130,8 +136,12 @@ class Knife(Gun):
     def knife_collision(self):
         collision_sprites = pygame.sprite.spritecollide(self, self.game.enemy_sprites, False, pygame.sprite.collide_mask)
         for enemy in collision_sprites:
-            if enemy.death_time == 0:
+            if type(enemy) != Orb and enemy.death_time == 0:
                 self.game.impact_sound.play()
+                if type(enemy) == Boss:
+                    enemy.lives -= 1
+                    if enemy.lives > 0:
+                        continue
                 enemy.destroy(False)
                 self.game.kill_count += 1
 
