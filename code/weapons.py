@@ -114,7 +114,8 @@ class Lasergun(Gun):
         for bullet, enemies in collision_sprites.items():
             for enemy in enemies:
                 self.game.impact_sound.play()
-                enemy.destroy(False)
+                if type(enemy) == Enemy:
+                    enemy.destroy(False)
                 if type(bullet) == Bullet:
                     bullet.kill()
                     Laser(self.game.laser_surf, enemy.rect.center, bullet.direction, (self.game.all_sprites, self.game.bullet_sprites))

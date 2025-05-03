@@ -15,6 +15,7 @@ class Game:
         self.font = pygame.font.Font(join('..', 'images', 'Oxanium-Bold.ttf'), 40)
         self.kill_count = 0
         self.high_score = load_high_score()
+
         # groups
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
@@ -23,15 +24,17 @@ class Game:
         self.powerup_sprites = pygame.sprite.Group()
         self.laser_sprites = pygame.sprite.Group()
         self.orb_sprites = pygame.sprite.Group()
+        
         #events
         self.enemy_event = pygame.event.custom_type()
         pygame.time.set_timer(self.enemy_event, 300)
         self.powerup_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.powerup_event, 15000)
+        pygame.time.set_timer(self.powerup_event, 5000)
         self.boss_event = pygame.event.custom_type()
         pygame.time.set_timer(self.boss_event, 10000)
         self.enemy_spawn_positions = []
         self.powerup_spawn_positions = []
+        
         #audio
         self.shoot_sound = pygame.mixer.Sound(join('..', 'audio', 'shoot.wav'))
         self.shoot_sound.set_volume(0.2)

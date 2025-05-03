@@ -99,7 +99,7 @@ class Player(pygame.sprite.Sprite):
                     self.speed = PLAYER_SPEED
                     self.animation_speed = ANIMATION_SPEED
                 else:
-                    surfs = self.frames['left']
+                    #surfs = self.frames['left']
                     self.gun.kill()
                     self.gun = Gun(self.gun_surf, self, self.game.all_sprites, self.game)
                 self.powerup_activated = 'none'
