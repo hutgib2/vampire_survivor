@@ -1,6 +1,7 @@
 from settings import *
 from weapons import Gun, PiercingGun, Shotgun, Machinegun, Lasergun, Sideshotgun, Knife
 from homescreen import save_high_score
+from projectiles import Orb
 
 PLAYER_SPEED = 350
 ANIMATION_SPEED = 6
@@ -79,7 +80,7 @@ class Player(pygame.sprite.Sprite):
         collision_sprites = pygame.sprite.spritecollide(self, self.game.enemy_sprites, False, pygame.sprite.collide_mask)
         for enemy in collision_sprites:
             if self.powerup_activated != 'shield':
-                if enemy.type != 'orb':
+                if type(enemy) != Orb:
                     enemy.destroy(True)
                 else:
                     enemy.kill()
