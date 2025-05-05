@@ -72,20 +72,23 @@ class Game:
         self.knife_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'knife.png')), (150, 50)).convert_alpha()
         self.superspeed_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'superspeed.png')), (81, 81)).convert_alpha()
         self.shield_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'shield.png')), (81, 81)).convert_alpha()
+        self.slow_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'snail.png')), (96, 96)).convert_alpha()
+        self.aura_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'aura.png')), (600, 600)).convert_alpha()
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
         self.boss_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'enemies', 'vampire.png')), (144, 288)).convert_alpha()
         self.orb_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'enemies', 'orb.png')), (52, 52)).convert_alpha()
         
         self.powerup_surfaces = {
-                                'life':self.life_surf, 
-                                'pierce':self.pierce_surf, 
-                                'machinegun':self.machinegun_surf, 
-                                'laser':self.lasergun_surf, 
-                                'shotgun':self.shotgun_surf, 
-                                'sideshot':self.gun_surf, 
-                                'knife':self.knife_surf, 
-                                'superspeed':self.superspeed_surf,
-                                'shield':self.shield_surf
+                                # 'life':self.life_surf, 
+                                # 'pierce':self.pierce_surf, 
+                                # 'machinegun':self.machinegun_surf, 
+                                # 'laser':self.lasergun_surf, 
+                                # 'shotgun':self.shotgun_surf, 
+                                # 'sideshot':self.gun_surf, 
+                                # 'knife':self.knife_surf, 
+                                # 'superspeed':self.superspeed_surf,
+                                # 'shield':self.shield_surf,
+                                'slowaura': self.slow_surf
                                 }
         
         folders = list(walk(join('..', 'images', 'enemies')))[0][1]

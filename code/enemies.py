@@ -27,13 +27,20 @@ class Enemy(pygame.sprite.Sprite):
         player_pos = pygame.Vector2(self.player.rect.center)
         enemy_pos = pygame.Vector2(self.rect.center)
         self.direction = (player_pos - enemy_pos).normalize()
-        self.hitbox_rect.x += self.direction.x * self.speed * dt
+        if self.player.aura != None and (player_pos - enemy_pos).length() <= 300:
+            self.hitbox_rect.x += self.direction.x * self.speed * dt / 2
+        else:
+            self.hitbox_rect.x += self.direction.x * self.speed * dt
         if self.type != 'bat':
             self.collisions('horizontal')
-        self.hitbox_rect.y += self.direction.y * self.speed * dt
+        if self.player.aura != None and (player_pos - enemy_pos).length() <= 300:
+            self.hitbox_rect.y += self.direction.y * self.speed * dt / 2
+        else:
+            self.hitbox_rect.y += self.direction.y * self.speed * dt
         if self.type != 'bat':
             self.collisions('vertical')
         self.rect.center = self.hitbox_rect.center
+
 
     def collisions(self, direction):
         for sprite in self.collision_sprites:
@@ -79,7 +86,7 @@ class Boss(pygame.sprite.Sprite):
     def __init__(self, pos, surf, player, game):
         super().__init__(game.all_sprites, game.enemy_sprites)
         self.game = game
-        self.lives = 10
+        self.lives = 25
         self.player = player
         self.image = surf
         self.type = 'boss'
@@ -113,7 +120,7 @@ class Boss(pygame.sprite.Sprite):
                     self.image.set_at((x, y), (175, 0, 0))
 
     def shoot(self):
-        if pygame.mouse.get_pressed()[0] and self.can_shoot:
+        if self.can_shoot:
             self.game.shoot_sound.play()
             Orb(self.game.orb_surf, self.rect.center, (pygame.math.Vector2(self.player.rect.center) - (pygame.math.Vector2(self.rect.center))).normalize(), (self.game.all_sprites, self.game.enemy_sprites))
             self.can_shoot = False

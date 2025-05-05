@@ -5,6 +5,15 @@ from projectiles import Orb
 
 PLAYER_SPEED = 350
 ANIMATION_SPEED = 6
+class Aura(pygame.sprite.Sprite):
+    def __init__(self, groups, surf, player):
+        super().__init__(groups)
+        self.image = surf
+        self.image.set_alpha(164)
+        self.rect = self.image.get_frect(center = player.rect.center)
+        self.player = player
+    def update(self, _):
+        self.rect.center = self.player.rect.center
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos, groups, collision_sprites, gun_surf, game):
@@ -22,9 +31,10 @@ class Player(pygame.sprite.Sprite):
         self.lives = 3
         self.game = game
         self.gun = Gun(self.gun_surf, self, self.game.all_sprites, self.game)
-        self.powerup_activated = 'none'
+        self.powerup_activated = None
         self.powerup_cooldown = 5000
         self.powerup_activation_time = 0
+        self.aura = None
 
     def move(self, dt):
         self.hitbox_rect.x += self.direction.x * self.speed * dt
@@ -93,17 +103,19 @@ class Player(pygame.sprite.Sprite):
         return False
     
     def powerup_timer(self):
-        if self.powerup_activated != 'none':
+        if self.powerup_activated != None:
             current_time = pygame.time.get_ticks()
             if current_time - self.powerup_activation_time >= self.powerup_cooldown:
                 if self.powerup_activated == 'superspeed':
                     self.speed = PLAYER_SPEED
                     self.animation_speed = ANIMATION_SPEED
+                elif self.powerup_activated == 'slowaura':
+                    self.aura.kill()
+                    self.aura = None
                 else:
-                    #surfs = self.frames['left']
                     self.gun.kill()
                     self.gun = Gun(self.gun_surf, self, self.game.all_sprites, self.game)
-                self.powerup_activated = 'none'
+                self.powerup_activated = None
 
     def powerup_collision(self):
         powerup_collisions = pygame.sprite.spritecollide(self, self.game.powerup_sprites, True, pygame.sprite.collide_mask)
@@ -120,6 +132,11 @@ class Player(pygame.sprite.Sprite):
                 self.animation_speed = ANIMATION_SPEED * 2
                 continue
             if self.powerup_activated == 'shield':
+                return
+            if self.powerup_activated == 'slowaura':
+                if self.aura != None:
+                    self.aura.kill()
+                self.aura = Aura(self.game.all_sprites, self.game.aura_surf, self)
                 return
             self.gun.kill()
             if powerup.type == 'pierce':

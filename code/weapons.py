@@ -48,16 +48,17 @@ class Gun(pygame.sprite.Sprite):
                 self.can_shoot = True
     
     def bullet_collision(self):
-        collision_sprites = pygame.sprite.groupcollide(self.game.bullet_sprites, self.game.enemy_sprites, True, False, pygame.sprite.collide_mask)
+        collision_sprites = pygame.sprite.groupcollide(self.game.bullet_sprites, self.game.enemy_sprites, False, False, pygame.sprite.collide_mask)
         for bullet, enemies in collision_sprites.items():
             for enemy in enemies:
                 if type(enemy) == Orb:
                     continue
                 self.game.impact_sound.play()
+                bullet.kill()
                 if type(enemy) == Boss:
                     enemy.lives -= 1
                     if enemy.lives > 0:
-                        continue 
+                        continue
                 enemy.destroy(False)
                 self.game.kill_count += 1
 
@@ -76,10 +77,16 @@ class PiercingGun(Gun):
         collision_sprites = pygame.sprite.groupcollide(self.game.bullet_sprites, self.game.enemy_sprites, False, False, pygame.sprite.collide_mask)
         for bullet, enemies in collision_sprites.items():
             for enemy in enemies:
+                if type(enemy) == Orb:
+                    continue
                 self.game.impact_sound.play()
+                if type(enemy) == Boss:
+                    enemy.lives -= 1
+                    bullet.kill()
+                    if enemy.lives > 0:
+                        continue
                 enemy.destroy(False)
                 self.game.kill_count += 1
-                break
 
 class Shotgun(Gun):        
     def shoot(self):
@@ -117,13 +124,15 @@ class Lasergun(Gun):
                 if type(enemy) == Orb:
                     continue
                 self.game.impact_sound.play()
-                if enemy.type == Boss:
-                    enemy.lives -= 1
-                    if enemy.lives > 0:
-                        continue
                 if type(bullet) == Bullet:
                     bullet.kill()
                     Laser(self.game.laser_surf, enemy.rect.center, bullet.direction, (self.game.all_sprites, self.game.bullet_sprites))
+                if enemy.type == Boss:
+                    if type(bullet) == Laser:
+                        bullet.kill()
+                    enemy.lives -= 1
+                    if enemy.lives > 0:
+                        continue
                 enemy.destroy(False)
                 self.game.kill_count += 1
 
