@@ -29,9 +29,9 @@ class Game:
         self.enemy_event = pygame.event.custom_type()
         pygame.time.set_timer(self.enemy_event, 300)
         self.powerup_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.powerup_event, 5000)
+        pygame.time.set_timer(self.powerup_event, 15000)
         self.boss_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.boss_event, 10000)
+        pygame.time.set_timer(self.boss_event, 45000)
         self.enemy_spawn_positions = []
         self.powerup_spawn_positions = []
         
@@ -75,19 +75,18 @@ class Game:
         self.slow_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'snail.png')), (96, 96)).convert_alpha()
         self.aura_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'aura.png')), (600, 600)).convert_alpha()
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
-        self.boss_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'enemies', 'vampire.png')), (144, 288)).convert_alpha()
         self.orb_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'enemies', 'orb.png')), (52, 52)).convert_alpha()
         
         self.powerup_surfaces = {
-                                # 'life':self.life_surf, 
-                                # 'pierce':self.pierce_surf, 
-                                # 'machinegun':self.machinegun_surf, 
-                                # 'laser':self.lasergun_surf, 
-                                # 'shotgun':self.shotgun_surf, 
-                                # 'sideshot':self.gun_surf, 
-                                # 'knife':self.knife_surf, 
-                                # 'superspeed':self.superspeed_surf,
-                                # 'shield':self.shield_surf,
+                                'life':self.life_surf, 
+                                'pierce':self.pierce_surf, 
+                                'machinegun':self.machinegun_surf, 
+                                'laser':self.lasergun_surf, 
+                                'shotgun':self.shotgun_surf, 
+                                'sideshot':self.gun_surf, 
+                                'knife':self.knife_surf, 
+                                'superspeed':self.superspeed_surf,
+                                'shield':self.shield_surf,
                                 'slowaura': self.slow_surf
                                 }
         
@@ -132,7 +131,7 @@ class Game:
                 if event.type == self.enemy_event:
                     Enemy(self.get_spawn_position(self.enemy_spawn_positions), choice(list(self.enemy_frames.items())), self.player, self.collision_sprites, self)
                 if event.type == self.boss_event:
-                    Boss(self.get_spawn_position(self.enemy_spawn_positions), self.boss_surf, self.player, self)
+                    Boss(self.get_spawn_position(self.enemy_spawn_positions), self.player, self)
                 if event.type == self.powerup_event and len(self.powerup_spawn_positions) - 1 > 0:
                     Powerup(self.powerup_spawn_positions.pop(randint(0, len(self.powerup_spawn_positions) - 1)), choice(list(self.powerup_surfaces.items())), (self.all_sprites, self.powerup_sprites), self.player)
             self.all_sprites.update(dt)

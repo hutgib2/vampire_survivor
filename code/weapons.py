@@ -62,8 +62,6 @@ class Gun(pygame.sprite.Sprite):
                 enemy.destroy(False)
                 self.game.kill_count += 1
 
-
-
     def update(self, _):
         self.get_direction()
         self.rotate()
@@ -127,7 +125,7 @@ class Lasergun(Gun):
                 if type(bullet) == Bullet:
                     bullet.kill()
                     Laser(self.game.laser_surf, enemy.rect.center, bullet.direction, (self.game.all_sprites, self.game.bullet_sprites))
-                if enemy.type == Boss:
+                if type(enemy) == Boss:
                     if type(bullet) == Laser:
                         bullet.kill()
                     enemy.lives -= 1
