@@ -1,5 +1,6 @@
 from settings import *
 from projectiles import Orb
+
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, pos, framedata, player, collision_sprites, game):
         super().__init__(game.all_sprites, game.enemy_sprites)

@@ -1,7 +1,8 @@
 from settings import *
 from weapons import Gun, PiercingGun, Shotgun, Machinegun, Lasergun, Sideshotgun, Knife, Flamegun
 from homescreen import save_high_score
-from projectiles import Orb
+from projectiles import Orb, Mine
+from enemies import Boss
 
 PLAYER_SPEED = 350
 ANIMATION_SPEED = 6
@@ -35,6 +36,9 @@ class Player(pygame.sprite.Sprite):
         self.powerup_cooldown = 5000
         self.powerup_activation_time = 0
         self.aura = None
+        self.minedrop_time = 0
+        self.minedrop_cooldown = 500
+        self.can_drop_mine = False
 
     def move(self, dt):
         self.hitbox_rect.x += self.direction.x * self.speed * dt
@@ -90,10 +94,12 @@ class Player(pygame.sprite.Sprite):
         collision_sprites = pygame.sprite.spritecollide(self, self.game.enemy_sprites, False, pygame.sprite.collide_mask)
         for enemy in collision_sprites:
             if self.powerup_activated != 'shield':
-                if type(enemy) != Orb:
-                    enemy.destroy(True)
-                else:
+                if type(enemy) == Orb:
                     enemy.kill()
+                elif type(enemy) == Boss:
+                    pass
+                else:
+                    enemy.destroy(True)
                 self.game.impact_sound.play()
                 self.lives -= 1
                 if self.lives < 1:
@@ -114,10 +120,20 @@ class Player(pygame.sprite.Sprite):
                     self.aura = None
                 elif self.powerup_activated == 'timestop':
                     pass
+                elif self.powerup_activated == 'mine':
+                    pass
                 else:
                     self.gun.kill()
                     self.gun = Gun(self.gun_surf, self, self.game.all_sprites, self.game)
                 self.powerup_activated = None
+
+    def mine_timer(self):
+        if self.powerup_activated == 'mine' and self.can_drop_mine:
+            Mine(self.game.mine_surf, self.rect.center, self.game.all_sprites, self.game)
+            self.minedrop_time = pygame.time.get_ticks()
+            self.can_drop_mine = False
+        elif pygame.time.get_ticks() - self.minedrop_time >= self.minedrop_cooldown:
+            self.can_drop_mine = True
 
     def powerup_collision(self):
         powerup_collisions = pygame.sprite.spritecollide(self, self.game.powerup_sprites, True, pygame.sprite.collide_mask)
@@ -141,7 +157,10 @@ class Player(pygame.sprite.Sprite):
                 self.aura = Aura(self.game.all_sprites, self.game.aura_surf, self)
                 return
             if powerup.type == 'timestop':
-                continue 
+                continue
+            if powerup.type == 'mine':
+                self.can_drop_mine = True
+                continue
             self.gun.kill()
             if powerup.type == 'pierce':
                 self.gun = PiercingGun(self.gun_surf, self, self.game.all_sprites, self.game)
@@ -158,9 +177,26 @@ class Player(pygame.sprite.Sprite):
             elif powerup.type == 'flamegun':
                 self.gun = Flamegun(self.game.flamegun_surf, self, self.game.all_sprites, self.game)
 
+    def explosion_collisions(self):
+        collision_sprites = pygame.sprite.groupcollide(self.game.explosion_sprites, self.game.enemy_sprites, False, False, pygame.sprite.collide_mask)
+        for explosion, enemies in collision_sprites.items():
+            for enemy in enemies:
+                if type(enemy) == Orb:
+                    continue
+                self.game.impact_sound.play()
+                if type(enemy) == Boss:
+                    explosion.kill()
+                    enemy.lives -= 1
+                    if enemy.lives > 0:
+                        continue
+                enemy.destroy(False)
+                self.game.kill_count += 1
+
     def update(self, dt):
         self.input()
         self.move(dt)
         self.animate(dt)
         self.powerup_collision()
         self.powerup_timer()
+        self.mine_timer()
+        self.explosion_collisions()
