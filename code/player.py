@@ -1,5 +1,5 @@
 from settings import *
-from weapons import Gun, PiercingGun, Shotgun, Machinegun, Lasergun, Sideshotgun, Knife
+from weapons import Gun, PiercingGun, Shotgun, Machinegun, Lasergun, Sideshotgun, Knife, Flamegun
 from homescreen import save_high_score
 from projectiles import Orb
 
@@ -112,6 +112,8 @@ class Player(pygame.sprite.Sprite):
                 elif self.powerup_activated == 'slowaura':
                     self.aura.kill()
                     self.aura = None
+                elif self.powerup_activated == 'timestop':
+                    pass
                 else:
                     self.gun.kill()
                     self.gun = Gun(self.gun_surf, self, self.game.all_sprites, self.game)
@@ -131,13 +133,15 @@ class Player(pygame.sprite.Sprite):
                 self.speed = PLAYER_SPEED * 2
                 self.animation_speed = ANIMATION_SPEED * 2
                 continue
-            if self.powerup_activated == 'shield':
+            if powerup.type == 'shield':
                 return
-            if self.powerup_activated == 'slowaura':
+            if powerup.type == 'slowaura':
                 if self.aura != None:
                     self.aura.kill()
                 self.aura = Aura(self.game.all_sprites, self.game.aura_surf, self)
                 return
+            if powerup.type == 'timestop':
+                continue 
             self.gun.kill()
             if powerup.type == 'pierce':
                 self.gun = PiercingGun(self.gun_surf, self, self.game.all_sprites, self.game)
@@ -151,6 +155,8 @@ class Player(pygame.sprite.Sprite):
                 self.gun = Sideshotgun(self.gun_surf, self, self.game.all_sprites, self.game)
             elif powerup.type == 'knife':
                 self.gun = Knife(self.game.knife_surf, self, self.game.all_sprites, self.game)
+            elif powerup.type == 'flamegun':
+                self.gun = Flamegun(self.game.flamegun_surf, self, self.game.all_sprites, self.game)
 
     def update(self, dt):
         self.input()

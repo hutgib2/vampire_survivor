@@ -82,7 +82,7 @@ class Enemy(pygame.sprite.Sprite):
         else:
             self.death_timer()
 
-BOSS_SPEED = 150
+BOSS_SPEED = 175
 
 class Boss(pygame.sprite.Sprite):
     def __init__(self, pos, player, game):
@@ -92,7 +92,7 @@ class Boss(pygame.sprite.Sprite):
         self.lives = 25
         self.player = player
         self.type = 'boss'
-        self.animation_speed = 6
+        self.animation_speed = 9
         self.position_offset = [0, 1, 0, -1]
         self.frame_index = 0
         self.state = 'right'
@@ -116,7 +116,7 @@ class Boss(pygame.sprite.Sprite):
                 if file_names:
                     for file_name in sorted(file_names, key= lambda name: int(name.split('.')[0])):
                         full_path = join(folder_path, file_name)
-                        surf = pygame.transform.scale(pygame.image.load(full_path), (256, 256)).convert_alpha()
+                        surf = pygame.transform.scale(pygame.image.load(full_path), (320, 320)).convert_alpha()
                         self.walk_frames[state].append(surf)
 
         self.attack_frames = {'left': [], 'right': [], 'up': [], 'down': []}
@@ -125,7 +125,7 @@ class Boss(pygame.sprite.Sprite):
                 if file_names:
                     for file_name in sorted(file_names, key= lambda name: int(name.split('.')[0])):
                         full_path = join(folder_path, file_name)
-                        surf = pygame.transform.scale(pygame.image.load(full_path), (256, 256)).convert_alpha()
+                        surf = pygame.transform.scale(pygame.image.load(full_path), (320, 320)).convert_alpha()
                         self.attack_frames[state].append(surf)
 
     def loop_frames(self, frames, dt):

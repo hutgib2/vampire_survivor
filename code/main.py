@@ -31,7 +31,7 @@ class Game:
         self.powerup_event = pygame.event.custom_type()
         pygame.time.set_timer(self.powerup_event, 15000)
         self.boss_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.boss_event, 45000)
+        pygame.time.set_timer(self.boss_event, 15000)
         self.enemy_spawn_positions = []
         self.powerup_spawn_positions = []
         
@@ -74,20 +74,24 @@ class Game:
         self.shield_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'shield.png')), (81, 81)).convert_alpha()
         self.slow_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'snail.png')), (96, 96)).convert_alpha()
         self.aura_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'aura.png')), (600, 600)).convert_alpha()
+        self.timestop_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'clock.png')), (83, 99)).convert_alpha()
+        self.flamegun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'flamegun.png')), (100, 75)).convert_alpha()
         self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
         self.orb_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'enemies', 'orb.png')), (52, 52)).convert_alpha()
         
         self.powerup_surfaces = {
-                                'life':self.life_surf, 
-                                'pierce':self.pierce_surf, 
-                                'machinegun':self.machinegun_surf, 
-                                'laser':self.lasergun_surf, 
-                                'shotgun':self.shotgun_surf, 
-                                'sideshot':self.gun_surf, 
-                                'knife':self.knife_surf, 
-                                'superspeed':self.superspeed_surf,
-                                'shield':self.shield_surf,
-                                'slowaura': self.slow_surf
+                                # 'life':self.life_surf, 
+                                # 'pierce':self.pierce_surf, 
+                                # 'machinegun':self.machinegun_surf, 
+                                # 'laser':self.lasergun_surf, 
+                                # 'shotgun':self.shotgun_surf, 
+                                # 'sideshot':self.gun_surf, 
+                                # 'knife':self.knife_surf, 
+                                # 'superspeed':self.superspeed_surf,
+                                # 'shield':self.shield_surf,
+                                # 'slowaura': self.slow_surf,
+                                # 'timestop': self.timestop_surf,
+                                'flamegun': self.flamegun_surf
                                 }
         
         folders = list(walk(join('..', 'images', 'enemies')))[0][1]
@@ -99,6 +103,13 @@ class Game:
                     full_path = join(folder_path, file_name)
                     surf = pygame.image.load(full_path).convert_alpha()
                     self.enemy_frames[folder].append(surf)
+
+        self.flame_frames = []
+        for folder_path, _, file_names in walk(join('..', 'images', 'powerups', 'flame')):
+            for file_name in sorted(file_names, key = lambda name: int(name.split('.')[0])):
+                full_path = join(folder_path, file_name)
+                surf = pygame.transform.scale(pygame.image.load(full_path), (100, 100)).convert_alpha()
+                self.flame_frames.append(surf)
             
     def load_data(self):
         self.load_images()
@@ -128,7 +139,7 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return False
-                if event.type == self.enemy_event:
+                if event.type == self.enemy_event and self.player.powerup_activated != 'timestop':
                     Enemy(self.get_spawn_position(self.enemy_spawn_positions), choice(list(self.enemy_frames.items())), self.player, self.collision_sprites, self)
                 if event.type == self.boss_event:
                     Boss(self.get_spawn_position(self.enemy_spawn_positions), self.player, self)

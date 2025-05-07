@@ -29,13 +29,33 @@ class Laser(pygame.sprite.Sprite):
         if pygame.time.get_ticks() - self.spawn_time >= self.lifetime:
             self.kill()
 
+class Flame(pygame.sprite.Sprite):
+    def __init__(self, frames, pos, groups):
+        super().__init__(groups)
+        self.image = frames[0]
+        self.rect = self.image.get_frect(center = pos)
+        self.spawn_time = pygame.time.get_ticks()
+        self.lifetime = 1000
+        self.frames = frames
+        self.frame_index = 0
+        self.animation_speed = 15
+
+    def animate(self, dt):
+        self.frame_index += self.animation_speed * dt
+        self.image = self.frames[int(self.frame_index) % len(self.frames)]
+    
+    def update(self, dt):
+        if pygame.time.get_ticks() - self.spawn_time >= self.lifetime:
+            self.kill()
+        self.animate(dt)
+
 class Orb(pygame.sprite.Sprite):
     def __init__(self, surf, pos, direction, groups):
         super().__init__(groups)
         self.image = surf
         self.rect = self.image.get_frect(center = pos) 
         self.spawn_time = pygame.time.get_ticks()
-        self.lifetime = 3000
+        self.lifetime = 5000
         self.direction = direction
         self.speed = 500
         self.type = 'orb'

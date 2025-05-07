@@ -1,6 +1,6 @@
 from settings import *
 from math import atan2, degrees
-from projectiles import Bullet, Laser, Orb
+from projectiles import Bullet, Laser, Orb, Flame
 from enemies import Enemy, Boss
 
 class Gun(pygame.sprite.Sprite):
@@ -157,3 +157,23 @@ class Knife(Gun):
         self.rotate()
         self.rect.center = self.player.rect.center + (self.player_direction + pygame.Vector2(0, -0.33)) * self.distance
         self.knife_collision()
+
+class Flamegun(Gun):
+    def bullet_collision(self):
+        collision_sprites = pygame.sprite.groupcollide(self.game.bullet_sprites, self.game.enemy_sprites, False, False, pygame.sprite.collide_mask)
+        for bullet, enemies in collision_sprites.items():
+            for enemy in enemies:
+                if type(enemy) == Orb:
+                    continue
+                self.game.impact_sound.play()
+                if type(bullet) == Bullet:
+                    bullet.kill()
+                    Flame(self.game.flame_frames, enemy.rect.center, (self.game.all_sprites, self.game.bullet_sprites))
+                if type(enemy) == Boss:
+                    if type(bullet) == Flame:
+                        bullet.kill()
+                    enemy.lives -= 1
+                    if enemy.lives > 0:
+                        continue
+                enemy.destroy(False)
+                self.game.kill_count += 1
