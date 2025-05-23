@@ -41,7 +41,7 @@ class Game:
         self.shoot_sound.set_volume(0.2)
         self.impact_sound = pygame.mixer.Sound(join('..', 'audio', 'new_impact.ogg'))
         self.impact_sound.set_volume(0.3)
-        self.music = pygame.mixer.Sound(join('..', 'audio', 'my_first_mashup.wav'))
+        self.music = pygame.mixer.Sound(join('..', 'audio', 'music.wav'))
         self.music.set_volume(0.55)
         self.music.play(loops = 0)
 
