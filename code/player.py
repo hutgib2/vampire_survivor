@@ -10,9 +10,10 @@ class Aura(pygame.sprite.Sprite):
     def __init__(self, groups, surf, player):
         super().__init__(groups)
         self.image = surf
-        self.image.set_alpha(164)
+        self.image.set_alpha(120)
         self.rect = self.image.get_frect(center = player.rect.center)
         self.player = player
+        self.radius = 400
     def update(self, _):
         self.rect.center = self.player.rect.center
 
@@ -33,7 +34,7 @@ class Player(pygame.sprite.Sprite):
         self.game = game
         self.gun = Gun(self.gun_surf, self, self.game.all_sprites, self.game)
         self.powerup_activated = None
-        self.powerup_cooldown = 5000
+        self.powerup_cooldown = 7000
         self.powerup_activation_time = 0
         self.aura = None
         self.minedrop_time = 0

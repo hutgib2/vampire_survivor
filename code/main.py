@@ -41,7 +41,7 @@ class Game:
         self.shoot_sound.set_volume(0.2)
         self.impact_sound = pygame.mixer.Sound(join('..', 'audio', 'new_impact.ogg'))
         self.impact_sound.set_volume(0.3)
-        self.music = pygame.mixer.Sound(join('..', 'audio', 'my_first_mashup.mp3'))
+        self.music = pygame.mixer.Sound(join('..', 'audio', 'my_first_mashup.wav'))
         self.music.set_volume(0.55)
         self.music.play(loops = 0)
 
@@ -74,7 +74,7 @@ class Game:
         self.superspeed_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'superspeed.png')), (81, 81)).convert_alpha()
         self.shield_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'shield.png')), (81, 81)).convert_alpha()
         self.slow_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'snail.png')), (96, 96)).convert_alpha()
-        self.aura_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'aura.png')), (600, 600)).convert_alpha()
+        self.aura_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'aura.png')), (800, 800)).convert_alpha()
         self.timestop_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'clock.png')), (83, 99)).convert_alpha()
         self.flamegun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'flamegun.png')), (100, 75)).convert_alpha()
         self.mine_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'mine.png')), (92, 42)).convert_alpha()

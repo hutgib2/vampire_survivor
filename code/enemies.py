@@ -28,13 +28,13 @@ class Enemy(pygame.sprite.Sprite):
         player_pos = pygame.Vector2(self.player.rect.center)
         enemy_pos = pygame.Vector2(self.rect.center)
         self.direction = (player_pos - enemy_pos).normalize()
-        if self.player.aura != None and (player_pos - enemy_pos).length() <= 300:
+        if self.player.aura != None and (player_pos - enemy_pos).length() <= self.player.aura.radius:
             self.hitbox_rect.x += self.direction.x * self.speed * dt / 2
         else:
             self.hitbox_rect.x += self.direction.x * self.speed * dt
         if self.type != 'bat':
             self.collisions('horizontal')
-        if self.player.aura != None and (player_pos - enemy_pos).length() <= 300:
+        if self.player.aura != None and (player_pos - enemy_pos).length() <= self.player.aura.radius:
             self.hitbox_rect.y += self.direction.y * self.speed * dt / 2
         else:
             self.hitbox_rect.y += self.direction.y * self.speed * dt
