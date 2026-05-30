@@ -169,7 +169,7 @@ if __name__ == '__main__':
     pygame.init()
     display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Vampire Survivor")
-    home_screen_image = pygame.transform.scale(pygame.image.load(join('..', 'images', 'home_screen.png')), (WINDOW_WIDTH, WINDOW_HEIGHT))
+    home_screen_image = pygame.transform.scale(pygame.image.load(join('..', 'images', 'home.png')), (WINDOW_WIDTH, WINDOW_HEIGHT))
     game_over_screen = pygame.transform.scale(pygame.image.load(join('..', 'images', 'game_over.png')), (WINDOW_WIDTH, WINDOW_HEIGHT))
     homescreen = HomeScreen(display_surface, home_screen_image)
     is_running = homescreen.wait()
