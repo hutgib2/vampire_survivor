@@ -1,13 +1,13 @@
 from settings import *
 
 def load_high_score():
-    with open(join('..', 'data', 'high_score.txt'), 'r') as file:
+    with open(join('data', 'high_score.txt'), 'r') as file:
         content = file.read()
         highscore = int(content.split("=")[1])
         return highscore
 
 def save_high_score(current_score):
-    with open(join('..', 'data', 'high_score.txt'), 'w') as file:
+    with open(join('data', 'high_score.txt'), 'w') as file:
         file.write('highscore=' + str(current_score))
 
 
@@ -17,7 +17,7 @@ class HomeScreen:
         self.waiting = True
         self.display_surface = display_surface
         self.background = background
-        self.font = pygame.font.Font(join('..', 'images', 'Oxanium-Bold.ttf'), 40)
+        self.font = pygame.font.Font(join('images', 'Oxanium-Bold.ttf'), 40)
 
         # Draw homescreen
         self.display_surface.blit(background, (0, 0))

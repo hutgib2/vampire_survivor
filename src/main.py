@@ -12,7 +12,7 @@ class Game:
         self.display_surface = display_surface
         self.running = True
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.Font(join('..', 'images', 'Oxanium-Bold.ttf'), 40)
+        self.font = pygame.font.Font(join('images', 'Oxanium-Bold.ttf'), 40)
         self.kill_count = 0
         self.high_score = load_high_score()
 
@@ -37,16 +37,16 @@ class Game:
         self.powerup_spawn_positions = []
         
         #audio
-        self.shoot_sound = pygame.mixer.Sound(join('..', 'audio', 'shoot.wav'))
+        self.shoot_sound = pygame.mixer.Sound(join('audio', 'shoot.ogg'))
         self.shoot_sound.set_volume(0.2)
-        self.impact_sound = pygame.mixer.Sound(join('..', 'audio', 'new_impact.ogg'))
+        self.impact_sound = pygame.mixer.Sound(join('audio', 'new_impact.ogg'))
         self.impact_sound.set_volume(0.3)
-        self.music = pygame.mixer.Sound(join('..', 'audio', 'my_first_mashup.mp3'))
+        self.music = pygame.mixer.Sound(join('audio', 'my_first_mashup.ogg'))
         self.music.set_volume(0.55)
         self.music.play(loops = 0)
 
     def load_map(self):
-        map = load_pygame(join('..', 'data', 'maps', 'world.tmx'))
+        map = load_pygame(join('data', 'maps', 'world.tmx'))
         for x, y, image in map.get_layer_by_name('Ground').tiles():
             Sprite((x * TILE_SIZE, y * TILE_SIZE), image, self.all_sprites)
         for obj in map.get_layer_by_name('Objects'):
@@ -62,24 +62,24 @@ class Game:
                 self.enemy_spawn_positions.append((marker.x, marker.y))
     
     def load_images(self):
-        self.life_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'life.png')), (75, 75)).convert_alpha()
-        self.pierce_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'pierce.png')), (75, 75)).convert_alpha()
-        self.machinegun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'machinegun.png')), (125, 60)).convert_alpha()
-        self.lasergun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'lasergun.png')), (100, 75)).convert_alpha()
+        self.life_surf = pygame.transform.scale(pygame.image.load(join('images', 'powerups', 'life.png')), (75, 75)).convert_alpha()
+        self.pierce_surf = pygame.transform.scale(pygame.image.load(join('images', 'powerups', 'pierce.png')), (75, 75)).convert_alpha()
+        self.machinegun_surf = pygame.transform.scale(pygame.image.load(join('images', 'powerups', 'machinegun.png')), (125, 60)).convert_alpha()
+        self.lasergun_surf = pygame.transform.scale(pygame.image.load(join('images', 'powerups', 'lasergun.png')), (100, 75)).convert_alpha()
         self.lasergun_surf = pygame.transform.flip(self.lasergun_surf, True, False)
-        self.laser_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'laserbeam.png')), (WINDOW_WIDTH, 75)).convert_alpha()
-        self.shotgun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'shotgun.png')), (150, 40)).convert_alpha()
-        self.gun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'gun.png')), (100, 54)).convert_alpha()
-        self.knife_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'knife.png')), (150, 50)).convert_alpha()
-        self.superspeed_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'superspeed.png')), (81, 81)).convert_alpha()
-        self.shield_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'shield.png')), (81, 81)).convert_alpha()
-        self.slow_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'snail.png')), (96, 96)).convert_alpha()
-        self.aura_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'aura.png')), (800, 800)).convert_alpha()
-        self.timestop_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'clock.png')), (83, 99)).convert_alpha()
-        self.flamegun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'flamegun.png')), (100, 75)).convert_alpha()
-        self.mine_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'mine.png')), (92, 42)).convert_alpha()
-        self.bullet_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
-        self.orb_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'enemies', 'orb.png')), (52, 52)).convert_alpha()
+        self.laser_surf = pygame.transform.scale(pygame.image.load(join('images', 'powerups', 'laserbeam.png')), (WINDOW_WIDTH, 75)).convert_alpha()
+        self.shotgun_surf = pygame.transform.scale(pygame.image.load(join('images', 'powerups', 'shotgun.png')), (150, 40)).convert_alpha()
+        self.gun_surf = pygame.transform.scale(pygame.image.load(join('images', 'gun', 'gun.png')), (100, 54)).convert_alpha()
+        self.knife_surf = pygame.transform.scale(pygame.image.load(join('images', 'powerups', 'knife.png')), (150, 50)).convert_alpha()
+        self.superspeed_surf = pygame.transform.scale(pygame.image.load(join('images', 'powerups', 'superspeed.png')), (81, 81)).convert_alpha()
+        self.shield_surf = pygame.transform.scale(pygame.image.load(join('images', 'powerups', 'shield.png')), (81, 81)).convert_alpha()
+        self.slow_surf = pygame.transform.scale(pygame.image.load(join('images', 'powerups', 'snail.png')), (96, 96)).convert_alpha()
+        self.aura_surf = pygame.transform.scale(pygame.image.load(join('images', 'powerups', 'aura.png')), (800, 800)).convert_alpha()
+        self.timestop_surf = pygame.transform.scale(pygame.image.load(join('images', 'powerups', 'clock.png')), (83, 99)).convert_alpha()
+        self.flamegun_surf = pygame.transform.scale(pygame.image.load(join('images', 'powerups', 'flamegun.png')), (100, 75)).convert_alpha()
+        self.mine_surf = pygame.transform.scale(pygame.image.load(join('images', 'powerups', 'mine.png')), (92, 42)).convert_alpha()
+        self.bullet_surf = pygame.transform.scale(pygame.image.load(join('images', 'gun', 'bullet.png')), (25, 25)).convert_alpha()
+        self.orb_surf = pygame.transform.scale(pygame.image.load(join('images', 'enemies', 'orb.png')), (52, 52)).convert_alpha()
         
         self.powerup_surfaces = {
                                 'life':self.life_surf, 
@@ -97,10 +97,10 @@ class Game:
                                 'mine': self.mine_surf
                                 }
         
-        folders = list(walk(join('..', 'images', 'enemies')))[0][1]
+        folders = list(walk(join('images', 'enemies')))[0][1]
         self.enemy_frames = {}
         for folder in folders:
-            for folder_path, _, file_names in walk(join('..', 'images', 'enemies', folder)):
+            for folder_path, _, file_names in walk(join('images', 'enemies', folder)):
                 self.enemy_frames[folder] = []
                 for file_name in sorted(file_names, key = lambda name: int(name.split('.')[0])):
                     full_path = join(folder_path, file_name)
@@ -108,14 +108,14 @@ class Game:
                     self.enemy_frames[folder].append(surf)
 
         self.flame_frames = []
-        for folder_path, _, file_names in walk(join('..', 'images', 'powerups', 'flame')):
+        for folder_path, _, file_names in walk(join('images', 'powerups', 'flame')):
             for file_name in sorted(file_names, key = lambda name: int(name.split('.')[0])):
                 full_path = join(folder_path, file_name)
                 surf = pygame.transform.scale(pygame.image.load(full_path), (100, 100)).convert_alpha()
                 self.flame_frames.append(surf)
 
         self.explosion_frames = []
-        for folder_path, _, file_names in walk(join('..', 'images', 'powerups', 'explosion')):
+        for folder_path, _, file_names in walk(join('images', 'powerups', 'explosion')):
             for file_name in sorted(file_names, key = lambda name: int(name.split('.')[0])):
                 full_path = join(folder_path, file_name)
                 surf = pygame.transform.scale(pygame.image.load(full_path), (100, 100)).convert_alpha()
@@ -169,8 +169,8 @@ if __name__ == '__main__':
     pygame.init()
     display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Vampire Survivor")
-    home_screen_image = pygame.transform.scale(pygame.image.load(join('..', 'images', 'home.png')), (WINDOW_WIDTH, WINDOW_HEIGHT))
-    game_over_screen = pygame.transform.scale(pygame.image.load(join('..', 'images', 'game_over.png')), (WINDOW_WIDTH, WINDOW_HEIGHT))
+    home_screen_image = pygame.transform.scale(pygame.image.load(join('images', 'home.png')), (WINDOW_WIDTH, WINDOW_HEIGHT))
+    game_over_screen = pygame.transform.scale(pygame.image.load(join('images', 'game_over.png')), (WINDOW_WIDTH, WINDOW_HEIGHT))
     homescreen = HomeScreen(display_surface, home_screen_image)
     is_running = homescreen.wait()
     while is_running:
