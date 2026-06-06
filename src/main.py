@@ -1,3 +1,9 @@
+# /// script
+# dependencies = [
+#   "pytmx",
+# ]
+# ///
+
 import asyncio
 import pygame
 from game.homescreen import HomeScreen

@@ -4,6 +4,7 @@ from game.sprites import *
 from game.groups import AllSprites
 from game.enemies import Enemy, Boss
 from game.homescreen import *
+from game.timer import Timer
 from random import randint, choice
 from pytmx.util_pygame import load_pygame
 
@@ -26,12 +27,10 @@ class Game:
         self.explosion_sprites = pygame.sprite.Group()
         
         #events
-        self.enemy_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.enemy_event, 300)
-        self.powerup_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.powerup_event, 15000)
-        self.boss_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.boss_event, 60000)
+        # need to stop enemy event when time_stop powerup activated
+        self.enemy_event_timer = Timer(400, lambda:Enemy(self.get_spawn_position(self.enemy_spawn_positions), choice(list(self.enemy_frames.items())), self.player, self.collision_sprites, self), repeat=True, autostart=True)
+        self.powerup_event_timer = Timer(15000, lambda:Powerup(self.powerup_spawn_positions.pop(randint(0, len(self.powerup_spawn_positions) - 1)), choice(list(self.powerup_surfaces.items())), (self.all_sprites, self.powerup_sprites), self.player), repeat=True, autostart=True)
+        self.boss_event_timer = Timer(60000, lambda:Boss(self.get_spawn_position(self.enemy_spawn_positions), self.player, self), repeat=True, autostart=True)
         self.enemy_spawn_positions = []
         self.powerup_spawn_positions = []
         
@@ -147,12 +146,6 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     return False
-                if event.type == self.enemy_event and self.player.powerup_activated != 'timestop':
-                    Enemy(self.get_spawn_position(self.enemy_spawn_positions), choice(list(self.enemy_frames.items())), self.player, self.collision_sprites, self)
-                if event.type == self.boss_event:
-                    Boss(self.get_spawn_position(self.enemy_spawn_positions), self.player, self)
-                if event.type == self.powerup_event and len(self.powerup_spawn_positions) - 1 > 0:
-                    Powerup(self.powerup_spawn_positions.pop(randint(0, len(self.powerup_spawn_positions) - 1)), choice(list(self.powerup_surfaces.items())), (self.all_sprites, self.powerup_sprites), self.player)
             self.all_sprites.update(dt)
             game_over = self.player.enemy_collision()
             if game_over:
@@ -161,4 +154,7 @@ class Game:
             self.all_sprites.draw(self.player.rect.center)
             self.display_score()
             self.display_lives()
+            self.enemy_event_timer.update()
+            self.powerup_event_timer.update()
+            self.boss_event_timer.update()
             pygame.display.update()
