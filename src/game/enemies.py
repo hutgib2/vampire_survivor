@@ -1,5 +1,5 @@
-from settings import *
-from projectiles import Orb
+from game.settings import *
+from game.projectiles import Orb
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, pos, framedata, player, collision_sprites, game):
@@ -113,7 +113,7 @@ class Boss(pygame.sprite.Sprite):
     def load_images(self):
         self.walk_frames = {'left': [], 'right': [], 'up': [], 'down': []}
         for state in self.walk_frames.keys():    # frames.keys() => ('left', 'right', 'up', 'down')
-            for folder_path, sub_folders, file_names in walk(join('images', 'boss', 'walk', state)):
+            for folder_path, sub_folders, file_names in walk(join('assets', 'images', 'boss', 'walk', state)):
                 if file_names:
                     for file_name in sorted(file_names, key= lambda name: int(name.split('.')[0])):
                         full_path = join(folder_path, file_name)
@@ -122,7 +122,7 @@ class Boss(pygame.sprite.Sprite):
 
         self.attack_frames = {'left': [], 'right': [], 'up': [], 'down': []}
         for state in self.attack_frames.keys():    # frames.keys() => ('left', 'right', 'up', 'down')
-            for folder_path, sub_folders, file_names in walk(join('images', 'boss', 'attack', state)):
+            for folder_path, sub_folders, file_names in walk(join('assets', 'images', 'boss', 'attack', state)):
                 if file_names:
                     for file_name in sorted(file_names, key= lambda name: int(name.split('.')[0])):
                         full_path = join(folder_path, file_name)

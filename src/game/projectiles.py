@@ -1,4 +1,4 @@
-from settings import *
+from game.settings import *
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, surf, pos, direction, groups):

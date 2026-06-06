@@ -1,7 +1,7 @@
-from settings import *
+from game.settings import *
+from game.projectiles import Bullet, Laser, Orb, Flame
+from game.enemies import Enemy, Boss
 from math import atan2, degrees
-from projectiles import Bullet, Laser, Orb, Flame
-from enemies import Enemy, Boss
 
 class Gun(pygame.sprite.Sprite):
     def __init__(self, surf, player, groups, game):

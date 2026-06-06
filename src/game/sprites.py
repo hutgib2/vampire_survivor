@@ -1,4 +1,4 @@
-from settings import *
+from game.settings import *
 from math import atan2, degrees
 
 class Sprite(pygame.sprite.Sprite):
