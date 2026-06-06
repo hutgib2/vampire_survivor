@@ -1,6 +1,6 @@
 from game.settings import *
 from game.weapons import Gun, PiercingGun, Shotgun, Machinegun, Lasergun, Sideshotgun, Knife, Flamegun
-from game.homescreen import save_high_score
+# from game.homescreen import save_high_score
 from game.projectiles import Orb, Mine
 from game.enemies import Boss
 
@@ -104,8 +104,8 @@ class Player(pygame.sprite.Sprite):
                 self.game.impact_sound.play()
                 self.lives -= 1
                 if self.lives < 1:
-                    if self.game.kill_count > self.game.high_score:
-                        save_high_score(self.game.kill_count)
+                    # if self.game.kill_count > self.game.high_score:
+                        # save_high_score(self.game.kill_count)
                     return True
         return False
     
