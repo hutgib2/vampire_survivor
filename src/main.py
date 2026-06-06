@@ -1,8 +1,9 @@
+import asyncio
 import pygame
 from game.homescreen import HomeScreen
-import asyncio
 
 async def main():
+    print('CREATING HOMESCREEN')
     homescreen = HomeScreen()
     await homescreen.run()
     

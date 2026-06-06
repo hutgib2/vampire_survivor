@@ -42,6 +42,8 @@ class HomeScreen:
                 self.running = False
 
     async def run(self):
+        print('RUNING HOMESCREEN')
+
         while self.running:
             self.handle_events()
             screen.blit(self.background, (0, 0))
@@ -49,6 +51,7 @@ class HomeScreen:
             await asyncio.sleep(0)
 
             if self.pending_game:
+                print('RUNING GAME')
                 await self.pending_game.run()
                 self.pending_game = None
                 self.background = self.game_over_screen

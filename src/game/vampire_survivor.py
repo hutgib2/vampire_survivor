@@ -141,7 +141,7 @@ class Game:
             self.life_rect = self.life_surf.get_frect(topleft = (10 + (i * 85), 10))
             screen.blit(self.life_surf, self.life_rect)
         
-    def run(self):
+    async def run(self):
         while self.running:
             dt = self.clock.tick() / 1000
             for event in pygame.event.get():
