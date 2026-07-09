@@ -41,7 +41,7 @@ class Game:
         self.shoot_sound.set_volume(0.2)
         self.impact_sound = pygame.mixer.Sound(join('..', 'audio', 'new_impact.ogg'))
         self.impact_sound.set_volume(0.3)
-        self.music = pygame.mixer.Sound(join('..', 'audio', 'my_first_mashup.wav'))
+        self.music = pygame.mixer.Sound(join('..', 'audio', 'my_first_mashup.mp3'))
         self.music.set_volume(0.55)
         self.music.play(loops = 0)
 
@@ -166,9 +166,6 @@ class Game:
             pygame.display.update()
 
 if __name__ == '__main__':
-    pygame.init()
-    display_surface = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    pygame.display.set_caption("Vampire Survivor")
     home_screen_image = pygame.transform.scale(pygame.image.load(join('..', 'images', 'home_screen.png')), (WINDOW_WIDTH, WINDOW_HEIGHT))
     game_over_screen = pygame.transform.scale(pygame.image.load(join('..', 'images', 'game_over.png')), (WINDOW_WIDTH, WINDOW_HEIGHT))
     homescreen = HomeScreen(display_surface, home_screen_image)
