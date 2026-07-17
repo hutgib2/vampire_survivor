@@ -70,7 +70,8 @@ class Game:
         self.laser_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'laserbeam.png')), (WINDOW_WIDTH, 75)).convert_alpha()
         self.shotgun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'shotgun.png')), (150, 40)).convert_alpha()
         self.gun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'gun.png')), (100, 54)).convert_alpha()
-        self.knife_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'knife.png')), (150, 50)).convert_alpha()
+        self.small_sword_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'sword.png')), (1490/6, 328/6)).convert_alpha()
+        self.sword_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'sword.png')), (1490/3, 328/3)).convert_alpha()
         self.superspeed_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'superspeed.png')), (81, 81)).convert_alpha()
         self.shield_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'shield.png')), (81, 81)).convert_alpha()
         self.slow_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'snail.png')), (96, 96)).convert_alpha()
@@ -82,19 +83,19 @@ class Game:
         self.orb_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'enemies', 'orb.png')), (52, 52)).convert_alpha()
         
         self.powerup_surfaces = {
-                                'life':self.life_surf, 
-                                'pierce':self.pierce_surf, 
-                                'machinegun':self.machinegun_surf, 
-                                'laser':self.lasergun_surf, 
-                                'shotgun':self.shotgun_surf, 
-                                'sideshot':self.gun_surf, 
-                                'knife':self.knife_surf, 
-                                'superspeed':self.superspeed_surf,
-                                'shield':self.shield_surf,
-                                'slowaura': self.slow_surf,
-                                'timestop': self.timestop_surf,
-                                'flamegun': self.flamegun_surf,
-                                'mine': self.mine_surf
+                                # 'life':self.life_surf, 
+                                # 'pierce':self.pierce_surf, 
+                                # 'machinegun':self.machinegun_surf, 
+                                # 'laser':self.lasergun_surf, 
+                                # 'shotgun':self.shotgun_surf, 
+                                # 'sideshot':self.gun_surf, 
+                                'sword':self.small_sword_surf, 
+                                # 'superspeed':self.superspeed_surf,
+                                # 'shield':self.shield_surf,
+                                # 'slowaura': self.slow_surf,
+                                # 'timestop': self.timestop_surf,
+                                # 'flamegun': self.flamegun_surf,
+                                # 'mine': self.mine_surf
                                 }
         
         folders = list(walk(join('..', 'images', 'enemies')))[0][1]

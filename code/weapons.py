@@ -135,12 +135,12 @@ class Lasergun(Gun):
                 self.game.kill_count += 1
 
 
-class Knife(Gun):
+class Sword(Gun):
     def __init__(self, surf, player, groups, game):
         super().__init__(surf, player, groups, game)
-        self.distance = 150
+        self.distance = 300
 
-    def knife_collision(self):
+    def Sword_collision(self):
         collision_sprites = pygame.sprite.spritecollide(self, self.game.enemy_sprites, False, pygame.sprite.collide_mask)
         for enemy in collision_sprites:
             if type(enemy) != Orb and enemy.death_time == 0:
@@ -155,8 +155,8 @@ class Knife(Gun):
     def update(self, _):
         self.get_direction()
         self.rotate()
-        self.rect.center = self.player.rect.center + (self.player_direction + pygame.Vector2(0, -0.33)) * self.distance
-        self.knife_collision()
+        self.rect = self.image.get_frect(center = self.player.rect.center + self.player_direction * self.distance)
+        self.Sword_collision()
 
 class Flamegun(Gun):
     def bullet_collision(self):

@@ -1,5 +1,5 @@
 from settings import *
-from weapons import Gun, PiercingGun, Shotgun, Machinegun, Lasergun, Sideshotgun, Knife, Flamegun
+from weapons import Gun, PiercingGun, Shotgun, Machinegun, Lasergun, Sideshotgun, Sword, Flamegun
 from homescreen import save_high_score
 from projectiles import Orb, Mine
 from enemies import Boss
@@ -173,8 +173,8 @@ class Player(pygame.sprite.Sprite):
                 self.gun = Shotgun(self.game.shotgun_surf, self, self.game.all_sprites, self.game)
             elif powerup.type == 'sideshot':
                 self.gun = Sideshotgun(self.gun_surf, self, self.game.all_sprites, self.game)
-            elif powerup.type == 'knife':
-                self.gun = Knife(self.game.knife_surf, self, self.game.all_sprites, self.game)
+            elif powerup.type == 'sword':
+                self.gun = Sword(self.game.sword_surf, self, self.game.all_sprites, self.game)
             elif powerup.type == 'flamegun':
                 self.gun = Flamegun(self.game.flamegun_surf, self, self.game.all_sprites, self.game)
 
