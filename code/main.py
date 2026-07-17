@@ -83,19 +83,19 @@ class Game:
         self.orb_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'enemies', 'orb.png')), (52, 52)).convert_alpha()
         
         self.powerup_surfaces = {
-                                # 'life':self.life_surf, 
-                                # 'pierce':self.pierce_surf, 
-                                # 'machinegun':self.machinegun_surf, 
-                                # 'laser':self.lasergun_surf, 
-                                # 'shotgun':self.shotgun_surf, 
-                                # 'sideshot':self.gun_surf, 
+                                'life':self.life_surf, 
+                                'pierce':self.pierce_surf, 
+                                'machinegun':self.machinegun_surf, 
+                                'laser':self.lasergun_surf, 
+                                'shotgun':self.shotgun_surf, 
+                                'sideshot':self.gun_surf, 
                                 'sword':self.small_sword_surf, 
-                                # 'superspeed':self.superspeed_surf,
-                                # 'shield':self.shield_surf,
-                                # 'slowaura': self.slow_surf,
-                                # 'timestop': self.timestop_surf,
-                                # 'flamegun': self.flamegun_surf,
-                                # 'mine': self.mine_surf
+                                'superspeed':self.superspeed_surf,
+                                'shield':self.shield_surf,
+                                'slowaura': self.slow_surf,
+                                'timestop': self.timestop_surf,
+                                'flamegun': self.flamegun_surf,
+                                'mine': self.mine_surf
                                 }
         
         folders = list(walk(join('..', 'images', 'enemies')))[0][1]
