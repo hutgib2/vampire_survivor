@@ -6,9 +6,9 @@ class Bullet(pygame.sprite.Sprite):
         self.image = surf
         self.rect = self.image.get_frect(center = pos) 
         self.spawn_time = pygame.time.get_ticks()
-        self.lifetime = 1000
+        self.lifetime = 2000
         self.direction = direction
-        self.speed = 1200
+        self.speed = 1600
     
     def update(self, dt):
         self.rect.center += self.direction * self.speed * dt
@@ -22,7 +22,7 @@ class Laser(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(surf, self.angle)
         self.rect = self.image.get_frect(center = pos)
         self.spawn_time = pygame.time.get_ticks()
-        self.lifetime = 50
+        self.lifetime = 32
         self.direction = pygame.math.Vector2(0,0)
     
     def update(self, dt):
@@ -35,7 +35,7 @@ class Flame(pygame.sprite.Sprite):
         self.image = frames[0]
         self.rect = self.image.get_frect(center = pos)
         self.spawn_time = pygame.time.get_ticks()
-        self.lifetime = 1000
+        self.lifetime = 2500
         self.frames = frames
         self.frame_index = 0
         self.animation_speed = 15
@@ -56,6 +56,8 @@ class Mine(pygame.sprite.Sprite):
         self.game = game
         self.rect = self.image.get_frect(center = pos)
         self.explosion_frames = self.game.explosion_frames
+        self.spawn_time = pygame.time.get_ticks()
+        self.lifetime = 10000
 
     def enemy_collisions(self):
         collision_sprites = pygame.sprite.spritecollide(self, self.game.enemy_sprites, False, pygame.sprite.collide_mask)
@@ -64,6 +66,8 @@ class Mine(pygame.sprite.Sprite):
             self.kill()
 
     def update(self, _):
+        if pygame.time.get_ticks() - self.spawn_time >= self.lifetime:
+            self.kill()
         self.enemy_collisions()
 
 class Explosion(pygame.sprite.Sprite):

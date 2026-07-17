@@ -34,7 +34,7 @@ class Player(pygame.sprite.Sprite):
         self.game = game
         self.gun = Gun(self.gun_surf, self, self.game.all_sprites, self.game)
         self.powerup_activated = None
-        self.powerup_cooldown = 7000
+        self.powerup_cooldown = 5000
         self.powerup_activation_time = 0
         self.aura = None
         self.minedrop_time = 0

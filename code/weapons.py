@@ -15,7 +15,7 @@ class Gun(pygame.sprite.Sprite):
         self.rect = self.image.get_frect(center = self.player.rect.center + self.player_direction * self.distance)
         self.can_shoot = True
         self.shoot_time = 0
-        self.cooldown = 250
+        self.cooldown = 300
     
     def get_direction(self):
         mouse_pos = pygame.Vector2(pygame.mouse.get_pos())
@@ -112,7 +112,7 @@ class Sideshotgun(Gun):
 class Machinegun(Gun):
     def __init__(self, surf, player, groups, game):
         super().__init__(surf, player, groups, game)
-        self.cooldown = 125
+        self.cooldown = 100
 
 class Lasergun(Gun):
     def bullet_collision(self):

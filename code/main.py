@@ -28,9 +28,9 @@ class Game:
         
         #events
         self.enemy_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.enemy_event, 360)
+        pygame.time.set_timer(self.enemy_event, 400)
         self.powerup_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.powerup_event, 15000)
+        pygame.time.set_timer(self.powerup_event, 25000)
         self.boss_event = pygame.event.custom_type()
         pygame.time.set_timer(self.boss_event, 75000)
         self.enemy_spawn_positions = []
@@ -112,14 +112,14 @@ class Game:
         for folder_path, _, file_names in walk(join('..', 'images', 'powerups', 'flame')):
             for file_name in sorted(file_names, key = lambda name: int(name.split('.')[0])):
                 full_path = join(folder_path, file_name)
-                surf = pygame.transform.scale(pygame.image.load(full_path), (100, 100)).convert_alpha()
+                surf = pygame.transform.scale(pygame.image.load(full_path), (128, 128)).convert_alpha()
                 self.flame_frames.append(surf)
 
         self.explosion_frames = []
         for folder_path, _, file_names in walk(join('..', 'images', 'powerups', 'explosion')):
             for file_name in sorted(file_names, key = lambda name: int(name.split('.')[0])):
                 full_path = join(folder_path, file_name)
-                surf = pygame.transform.scale(pygame.image.load(full_path), (100, 100)).convert_alpha()
+                surf = pygame.transform.scale(pygame.image.load(full_path), (256, 256)).convert_alpha()
                 self.explosion_frames.append(surf)
             
     def load_data(self):
