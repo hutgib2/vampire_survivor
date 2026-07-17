@@ -28,11 +28,11 @@ class Game:
         
         #events
         self.enemy_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.enemy_event, 300)
+        pygame.time.set_timer(self.enemy_event, 360)
         self.powerup_event = pygame.event.custom_type()
         pygame.time.set_timer(self.powerup_event, 15000)
         self.boss_event = pygame.event.custom_type()
-        pygame.time.set_timer(self.boss_event, 60000)
+        pygame.time.set_timer(self.boss_event, 75000)
         self.enemy_spawn_positions = []
         self.powerup_spawn_positions = []
         
@@ -127,7 +127,7 @@ class Game:
 
     def get_spawn_position(self, spawn_positions):
         distance_from_player = 0
-        while distance_from_player < 700:
+        while distance_from_player < 1000:
             pos = choice(spawn_positions)
             distance_from_player = pygame.math.Vector2.magnitude(pygame.math.Vector2(pos) - pygame.math.Vector2(self.player.rect.center))
         return pos  
