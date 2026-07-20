@@ -12,8 +12,9 @@ def save_high_score(current_score):
 
 
 class HomeScreen:
-    def __init__(self, display_surface, background):
+    def __init__(self, display_surface, background, score=0):
         self.high_score = load_high_score()
+        self.score = score
         self.waiting = True
         self.display_surface = display_surface
         self.background = background
@@ -26,7 +27,11 @@ class HomeScreen:
 
 
     def display_high_score(self):
-        self.text_surf = self.font.render('high score = ' +str(self.high_score), True, 'gray25')
+        # 'score = '+str(self.score) + '\nhigh score = ' +str(self.high_score)
+        score_string = 'high score = ' + str(self.high_score)
+        if self.score > 0:
+            score_string = 'score = '+str(self.score) + '\nhigh score = ' +str(self.high_score)
+        self.text_surf = self.font.render(score_string, True, 'gray25')
         self.text_rect = self.text_surf.get_frect(midbottom = (WINDOW_WIDTH / 2 - 180 ,WINDOW_HEIGHT - 180))
         self.display_surface.blit(self.text_surf, self.text_rect)
 

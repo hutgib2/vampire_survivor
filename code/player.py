@@ -147,8 +147,8 @@ class Player(pygame.sprite.Sprite):
             self.powerup_activation_time = pygame.time.get_ticks()
             self.powerup_activated = powerup.type
             if powerup.type == 'superspeed':
-                self.speed = PLAYER_SPEED * 2
-                self.animation_speed = ANIMATION_SPEED * 2
+                self.speed = PLAYER_SPEED * 3
+                self.animation_speed = ANIMATION_SPEED * 3
                 continue
             if powerup.type == 'shield':
                 return
