@@ -22,7 +22,7 @@ class Laser(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(surf, self.angle)
         self.rect = self.image.get_frect(center = pos)
         self.spawn_time = pygame.time.get_ticks()
-        self.lifetime = 32
+        self.lifetime = 2
         self.direction = pygame.math.Vector2(0,0)
     
     def update(self, dt):
@@ -100,7 +100,7 @@ class Orb(pygame.sprite.Sprite):
         self.spawn_time = pygame.time.get_ticks()
         self.lifetime = 5000
         self.direction = direction
-        self.speed = 500
+        self.speed = 750
         self.type = 'orb'
     
     def update(self, dt):

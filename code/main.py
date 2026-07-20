@@ -67,7 +67,7 @@ class Game:
         self.machinegun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'machinegun.png')), (125, 60)).convert_alpha()
         self.lasergun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'lasergun.png')), (100, 75)).convert_alpha()
         self.lasergun_surf = pygame.transform.flip(self.lasergun_surf, True, False)
-        self.laser_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'laserbeam.png')), (WINDOW_WIDTH, 75)).convert_alpha()
+        self.laser_surf = pygame.image.load(join('..', 'images', 'powerups', 'laserbeam.png')).convert_alpha()
         self.shotgun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'shotgun.png')), (150, 40)).convert_alpha()
         self.gun_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'gun', 'gun.png')), (100, 54)).convert_alpha()
         self.small_sword_surf = pygame.transform.scale(pygame.image.load(join('..', 'images', 'powerups', 'sword.png')), (1490/6, 328/6)).convert_alpha()

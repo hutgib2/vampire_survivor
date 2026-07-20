@@ -18,7 +18,7 @@ class Enemy(pygame.sprite.Sprite):
         self.direction = pygame.Vector2()
         self.speed = 250
         self.death_time = 0
-        self.death_duration = 400
+        self.death_duration = 250
 
     def animate(self, dt):
         self.frame_index += self.animation_speed * dt
@@ -83,7 +83,7 @@ class Enemy(pygame.sprite.Sprite):
         else:
             self.death_timer()
 
-BOSS_SPEED = 175
+BOSS_SPEED = 250
 
 class Boss(pygame.sprite.Sprite):
     def __init__(self, pos, player, game):
@@ -99,7 +99,7 @@ class Boss(pygame.sprite.Sprite):
         self.state = 'right'
         self.can_shoot = True
         self.shoot_time = 0
-        self.orb_cooldown = 500
+        self.orb_cooldown = 400
         self.attack_cooldown = 3000
         self.attack_time = 0
         self.can_attack = False
@@ -108,7 +108,7 @@ class Boss(pygame.sprite.Sprite):
         self.direction = pygame.Vector2()
         self.speed = BOSS_SPEED
         self.death_time = 0
-        self.death_duration = 400
+        self.death_duration = 250
     
     def load_images(self):
         self.walk_frames = {'left': [], 'right': [], 'up': [], 'down': []}
