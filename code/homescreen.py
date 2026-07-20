@@ -31,8 +31,8 @@ class HomeScreen:
         score_string = 'high score = ' + str(self.high_score)
         if self.score > 0:
             score_string = 'score = '+str(self.score) + '\nhigh score = ' +str(self.high_score)
-        self.text_surf = self.font.render(score_string, True, 'gray25')
-        self.text_rect = self.text_surf.get_frect(midbottom = (WINDOW_WIDTH / 2 - 180 ,WINDOW_HEIGHT - 180))
+        self.text_surf = self.font.render(score_string, True, 'white')
+        self.text_rect = self.text_surf.get_frect(midbottom = (WINDOW_WIDTH / 2 ,WINDOW_HEIGHT - 64))
         self.display_surface.blit(self.text_surf, self.text_rect)
 
     def wait(self):
